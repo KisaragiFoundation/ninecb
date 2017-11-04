@@ -1,84 +1,84 @@
 name: nine_cb
-version: 1.8.3
+version: "${project.internalVersion}"
 description: nine_cb
 author: lolita_is_god
 website: ~
-depend: [WorldGuard, CoreProtect]
+softdepend: [WorldGuard, CoreProtect]
 #---
 main: jp.hikahikaru17.dev.nine_cbs.nine_cbs
 #---
 commands:
     cbhelp:
         description: tell you help for CMD
-        usage: '/cbhelp'
+        usage: '/<command>'
     cbwarp:
         description: warp to somewhere (FOR CB)
-        usage: '/cbwarp'
+        usage: '/<command>'
     cbgm:
         description: change gamemode (FOR CB)
-        usage: '/cbgm'
+        usage: '/<command>'
     cbtp:
         description: teleport (FOR CB)
-        usage: '/cbtp'
+        usage: '/<command>'
     cbgive:
         description: give something (FOR CB)
-        usage: '/cbgive'
+        usage: '/<command>'
     cbtell:
         description: tell something (FOR CB)
-        usage: '/cbtell'
+        usage: '/<command>'
     cbsound:
         description: play sound (FOR CB)
-        usage: '/cbsound'
+        usage: '/<command>'
     cbtitle:
         description: show something (FOR CB)
-        usage: '/cbtitle'
+        usage: '/<command>'
     cbsubtitle:
         description: show something (FOR CB)
-        usage: '/cbsubtitle'
+        usage: '/<command>'
     cbeffect:
         description: some effect (FOR CB)
-        usage: '/cbeffect'
+        usage: '/<command>'
     cbxp:
         description: give (or take) EXP (FOR CB)
-        usage: '/cbxp'
+        usage: '/<command>'
     cbspeed:
         description: change speed (FOR CB)
-        usage: '/cbspeed'
+        usage: '/<command>'
     cbmenu:
         description: open menu (FOR CB) (need MyMenu)
-        usage: '/cbmenu'
+        usage: '/<command>'
     cbgod:
         description: switch god effect (FOR CB)
-        usage: '/cbgod'
+        usage: '/<command>'
     cbtpt:
         description: switch anybody can teleport you (FOR CB)
-        usage: '/cbtpt'
+        usage: '/<command>'
     cbmusic:
         description: play music by player (FOR CB)
-        usage: '/cbmusic'
+        usage: '/<command>'
     cbshot:
         description: give gun (FOR CB)
-        usage: '/cbshot'
+        usage: '/<command>'
     cbtell-a:
         description: tell players (default range is 10) something (FOR CB)
-        usage: '/cbtell-a'
+        usage: '/<command>'
     cbtitle-a:
         description: show players (default range is 10) something (FOR CB)
-        usage: '/cbtitle-a'
+        usage: '/<command>'
     cbsubtitle-a:
         description: show players (default range is 10) something (FOR CB)
-        usage: '/cbsubtitle-a'
+        usage: '/<command>'
     ninecb:
         description: admin only
-        usage: '/ninecb'
+        usage: '/<command>'
     cmd:
         description: none
-        usage: '/cmd'
+        usage: '/<command>'
     cmb:
         description: place cb
-        usage: '/cmb'
+        usage: '/<command>'
     uncmb:
         description: remove cb
-        usage: '/uncmb'
+        usage: '/<command>'
 
         
