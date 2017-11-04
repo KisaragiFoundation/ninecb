@@ -19,7 +19,7 @@ import org.bukkit.block.CommandBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.bukkit.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BlockVector;
 import net.coreprotect.*;
@@ -44,7 +44,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private final static String RANGE10 = ChatColor.GRAY +"(CBから半径10m以内のプレイヤー全員へ送信)"+ChatColor.RESET;
 	private final static String DEFAULT_SELECTER = "@p[r=10]";
 	private final static String ALL_SELECTER = "@a[r=10]";
-	private final static String VERSION = "1.8.3";
+	private final static String VERSION = "1.8.4";
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
 	private final static String CLAIMED = "保護されています！";
 	private final static int CBHELP_MAXPAGE = 3;
@@ -437,11 +437,11 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			sendmes(sender,"もしかして: cmb");
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cmb")) {
-			//WORLD GUARD CHECK
 			if (player==null) {
 				sendmes(sender,MUST_BE_PLAYER);
 				return true;
 			}
+			//WORLD GUARD CHECK
 			player.getLocation().setY(player.getLocation().getY()-1);
 			if (getWorldGuard().canBuild(player, player.getLocation()) != true) {
 				sender.sendMessage(CLAIMED);
@@ -456,18 +456,17 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			BlockVector max = new BlockVector(px+sprad,py,pz+sprad);
 			if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
 				player.getLocation().getBlock().setType(Material.COMMAND);
-				getCoreProtect().logPlacement(player.getName(), player.getLocation(), Material.COMMAND, (byte)0);
+				getCoreProtect().logPlacement(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); //CORE PROTECT
 			}
-
-
-			//TODO: CORE PROTECT
+			return true;
 
 		} else if (cmdname.equalsIgnoreCase("uncmd")) {
-			//WORLD GUARD CHECK
+
 			if (player==null) {
 				sendmes(sender,MUST_BE_PLAYER);
 				return true;
 			}
+			//WORLD GUARD CHECK
 			player.getLocation().setY(player.getLocation().getY()-1);
 			if (getWorldGuard() == null) {
 				sendmes(sender,notEnabledPL("WorldGuard"));
@@ -486,11 +485,11 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			BlockVector max = new BlockVector(px+sprad,py,pz+sprad);
 			if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
 				player.getLocation().getBlock().setType(Material.AIR);
-				getCoreProtect().logRemoval(player.getName(), player.getLocation(), Material.COMMAND, (byte)0);
+				getCoreProtect().logRemoval(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); 			//CORE PROTECT
 			}
+			return true;
 
 
-			//TODO: CORE PROTECT
 
 		}
 		/*} else if (cmdname.equalsIgnoreCase("cbmenu")) {
