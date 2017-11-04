@@ -44,7 +44,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private final static String RANGE10 = ChatColor.GRAY +"(CBから半径10m以内のプレイヤー全員へ送信)"+ChatColor.RESET;
 	private final static String DEFAULT_SELECTER = "@p[r=10]";
 	private final static String ALL_SELECTER = "@a[r=10]";
-	private final static String VERSION = "1.8.2";
+	private final static String VERSION = "1.8.3";
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
 	private final static String CLAIMED = "保護されています！";
 	private final static int CBHELP_MAXPAGE = 3;
@@ -54,10 +54,31 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		getLogger().info("test enable");
 		// コマンドを実行するプラグインをこれにするという設定
 		getCommand("cbhelp").setExecutor(this);
-		getCommand("ninecb").setExecutor(this);
-		getCommand("cbgm").setExecutor(this);
 		getCommand("cbwarp").setExecutor(this);
+		getCommand("cbgm").setExecutor(this);
 		getCommand("cbtp").setExecutor(this);
+		getCommand("cbgive").setExecutor(this);
+		getCommand("cbtell").setExecutor(this);
+		getCommand("cbsound").setExecutor(this);
+		getCommand("cbtitle").setExecutor(this);
+		getCommand("cbsubtitle").setExecutor(this);
+		getCommand("cbeffect").setExecutor(this);
+		getCommand("cbxp").setExecutor(this);
+		getCommand("cbspeed").setExecutor(this);
+		getCommand("cbmenu").setExecutor(this);
+		getCommand("cbgod").setExecutor(this);
+		getCommand("cbmenu").setExecutor(this);
+		getCommand("cbgod").setExecutor(this);
+		getCommand("cbtpt").setExecutor(this);
+		getCommand("cbmusic").setExecutor(this);
+		getCommand("cbshot").setExecutor(this);
+		getCommand("cbtell-a").setExecutor(this);
+		getCommand("cbtitle-a").setExecutor(this);
+		getCommand("cbsubtitle-a").setExecutor(this);
+		getCommand("ninecb").setExecutor(this);
+		getCommand("cmb").setExecutor(this);
+		getCommand("cmd").setExecutor(this);
+		getCommand("uncmd").setExecutor(this);
 		//this.getServer().getPluginManager().registerEvents(new MyListenerClass(), this));
 	}
 
