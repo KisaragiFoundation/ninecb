@@ -375,10 +375,10 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				return true;
 			}
 		} else if (cmdname.equalsIgnoreCase("cbtitle")) {
-			setCB(args,0,2,sender,String.format("/minecraft:title %s title %s",DEFAULT_SELECTER,String.join(" ", args)));
+			setCB(args,0,2,sender,String.format("/minecraft:title %s title %s",DEFAULT_SELECTER,args[0]));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbsubtitle")) {
-			setCB(args,0,2,sender,String.format("/minecraft:title %s subtitle %s",DEFAULT_SELECTER,String.join(" ", args)));
+			setCB(args,0,2,sender,String.format("/minecraft:title %s subtitle %s",DEFAULT_SELECTER,args[0]));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbeffect")) {
 			String setCommand = "minecraft:effect "+DEFAULT_SELECTER;
@@ -416,18 +416,10 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbgod")) {
-			if (enabled("essentials")) {
-				setCB(args,0,2,sender,String.format("/god %s",args[0]));
-			} else {
-				sendmes(sender,notEnabledPL("essentials"));
-			}
+			setCB(args,0,2,sender,String.format("/god %s",args[0]));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbfly")) {
-			if (enabled("essentials")) {
-				setCB(args,0,2,sender,String.format("/fly %s",args[0]));
-			} else {
-				sendmes(sender,notEnabledPL("essentials"));
-			}
+			setCB(args,0,2,sender,String.format("/fly %s",args[0]));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbtpt")) {
 			setCB(args,0,2,sender,String.format("/tpt %s",args[0]));
@@ -439,13 +431,13 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			setCB(args,0,2,sender,String.format("/shot give %s %s",DEFAULT_SELECTER,args[0]));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbtell-a")) {
-			setCB(args,0,2,sender,String.format("/minecraft:tell %s %s",ALL_SELECTER,String.join(" ",args)));
+			setCB(args,0,2,sender,String.format("/minecraft:tell %s %s",ALL_SELECTER,args[0]));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbtitle-a")) {
-			setCB(args,0,2,sender,String.format("/minecraft:title %s title %s",ALL_SELECTER,String.join(" ",args)));
+			setCB(args,0,2,sender,String.format("/minecraft:title %s title %s",ALL_SELECTER,args[0]));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbsubtitle-a")) {
-			setCB(args,0,2,sender,String.format("/minecraft:title %s subtitle %s",DEFAULT_SELECTER,String.join(" ",args)));
+			setCB(args,0,2,sender,String.format("/minecraft:title %s subtitle %s",DEFAULT_SELECTER,args[0]));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cmd")) {
 			sendmes(sender,"もしかして: cmb");
@@ -456,14 +448,10 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				return true;
 			}
 			//WORLD GUARD CHECK
-			if (DEBUG) {
-				getLogger().info(String.format("%3.2f,%d",player.getLocation().getY(),player.getLocation().getBlockY()));
-			}			
+			if (DEBUG) getLogger().info(String.format("%3.2f,%d",player.getLocation().getY(),player.getLocation().getBlockY()));			
 			Location loc = player.getLocation();
 			loc.setY(loc.getY()-1);
-			if (DEBUG) {
-				getLogger().info(String.format("%s",player.getLocation().getBlockY()));
-			}
+			if (DEBUG) getLogger().info(String.format("%s",player.getLocation().getBlockY()));
 			if (getWorldGuard() == null) {
 				sendmes(sender,notEnabledPL("WorldGuard"));
 				return true;
@@ -486,9 +474,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				getCoreProtect().logPlacement(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); //CORE PROTECT
 			}
 			return true;
-		} else if (cmdname.equalsIgnoreCase("uncmd")) {
-			sendmes(sender,"もしかして: cmb");
-			return true;
+
 		} else if (cmdname.equalsIgnoreCase("uncmb")) {
 			getServer().dispatchCommand(getServer().getConsoleSender(), "minecraft:tp "+ pa +"~ ~-1 ~");
 			if (player==null) {
