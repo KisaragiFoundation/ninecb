@@ -44,11 +44,11 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private final static String RANGE10 = ChatColor.GRAY +"(CBから半径10m以内のプレイヤー全員へ送信)"+ChatColor.RESET;
 	private final static String DEFAULT_SELECTER = "@p[r=10]";
 	private final static String ALL_SELECTER = "@a[r=10]";
-	private final static String VERSION = "1.8.4";
+	private final static String VERSION = "1.8.6";
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
 	private final static String CLAIMED = "保護されています！";
 	private final static int CBHELP_MAXPAGE = 3;
-	private final boolean DEBUG = false;
+	private final static boolean DEBUG = true;
 	@Override
 	public void onEnable() {
 		getLogger().info("test enable");
@@ -78,7 +78,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		getCommand("ninecb").setExecutor(this);
 		getCommand("cmb").setExecutor(this);
 		getCommand("cmd").setExecutor(this);
-		getCommand("uncmd").setExecutor(this);
+		getCommand("uncmb").setExecutor(this);
 		//this.getServer().getPluginManager().registerEvents(new MyListenerClass(), this));
 	}
 
@@ -335,14 +335,14 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				return true;
 			}
 		} else if (cmdname.equalsIgnoreCase("cbtell")) {
-			String tellMes = args[0];
+			String tellMes = String.join(" ",args); // スペースで切れる対処
 			String newTellMes = "";
 			boolean begins = false;
-			if (tellMes.contains("&")){ //装飾コードが含まれていたなら書き換え
-				newTellMes = ChatColor.translateAlternateColorCodes('&',args[0]);
+			if (tellMes.contains("&")){  //装飾コードが含まれていたなら書き換え
+				newTellMes = ChatColor.translateAlternateColorCodes('&',tellMes);
 				args[0] = newTellMes;
 			}
-			setCB(args,1,3,sender,String.format("/minecraft:tell %s %s",DEFAULT_SELECTER,args[0]));
+			setCB(args,1,3,sender,String.format("/minecraft:tell %s %s",DEFAULT_SELECTER,(newTellMes==null ? tellMes : newTellMes)));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbsound")) {
 			String setCommand = "minecraft:playsound ";
@@ -442,36 +442,45 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				return true;
 			}
 			//WORLD GUARD CHECK
-			player.getLocation().setY(player.getLocation().getY()-1);
+			if (DEBUG) getLogger().info(String.format("%3.2f,%d",player.getLocation().getY(),player.getLocation().getBlockY()));			
+			Location loc = player.getLocation();
+			loc.setY(loc.getY()-1);
+			if (DEBUG) getLogger().info(String.format("%s",player.getLocation().getBlockY()));
+			if (getWorldGuard() == null) {
+				sendmes(sender,notEnabledPL("WorldGuard"));
+				return true;
+			}
+			
 			if (getWorldGuard().canBuild(player, player.getLocation()) != true) {
 				sender.sendMessage(CLAIMED);
 				return true;
 			}
 			//CHECK SPAWN PROTECTION
 			int sprad = getServer().getSpawnRadius();
-			double px = player.getLocation().getX();
-			double py = player.getLocation().getY();
-			double pz = player.getLocation().getZ();
-			BlockVector min = new BlockVector(px-sprad,py,pz-sprad);
-			BlockVector max = new BlockVector(px+sprad,py,pz+sprad);
+			double px = loc.getX();
+			double py = loc.getY();
+
+			double pz = loc.getZ();
+			BlockVector min = new BlockVector(px-sprad,0,pz-sprad);
+			BlockVector max = new BlockVector(px+sprad,255,pz+sprad);
 			if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
 				player.getLocation().getBlock().setType(Material.COMMAND);
 				getCoreProtect().logPlacement(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); //CORE PROTECT
 			}
 			return true;
 
-		} else if (cmdname.equalsIgnoreCase("uncmd")) {
-
+		} else if (cmdname.equalsIgnoreCase("uncmb")) {
+			getServer().dispatchCommand(getServer().getConsoleSender(), "minecraft:tp "+ pa +"~ ~-1 ~");
 			if (player==null) {
 				sendmes(sender,MUST_BE_PLAYER);
 				return true;
 			}
 			//WORLD GUARD CHECK
-			player.getLocation().setY(player.getLocation().getY()-1);
 			if (getWorldGuard() == null) {
 				sendmes(sender,notEnabledPL("WorldGuard"));
 				return true;
 			}
+			
 			if (getWorldGuard().canBuild(player, player.getLocation()) != true) {
 				sender.sendMessage(CLAIMED);
 				return true;
@@ -483,6 +492,10 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			double pz = player.getLocation().getZ();
 			BlockVector min = new BlockVector(px-sprad,py,pz-sprad);
 			BlockVector max = new BlockVector(px+sprad,py,pz+sprad);
+			if (player.getLocation().getBlock().getType() != Material.COMMAND) {
+				sender.sendMessage("コマンドブロックではありません");
+				return true;
+			}
 			if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
 				player.getLocation().getBlock().setType(Material.AIR);
 				getCoreProtect().logRemoval(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); 			//CORE PROTECT
