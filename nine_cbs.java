@@ -510,13 +510,16 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 
 
 
-		}
-		/*} else if (cmdname.equalsIgnoreCase("cbmenu")) {
-			setCB(args,0,2,sender,String.format("/mmopen %s %s",args[0],DEFAULT_SELECTER));
+		} else if (cmdname.equalsIgnoreCase("cbwarp")) {
+			if (enabled("essentials")) {
+				setCB(args,0,2,sender,String.format("/warp %s %s",args[0],DEFAULT_SELECTER));
+			} else {
+				sendmes(sender,notEnabledPL("essentials"));
+			}
 		} else if (cmdname.equalsIgnoreCase("cbmenu")) {
 			setCB(args,0,2,sender,String.format("/mmopen %s %s",args[0],DEFAULT_SELECTER));
 		}
-		*/
+		/**/
 		return false;//該当コマンドなし
 	}
 
@@ -621,7 +624,9 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			e.printStackTrace();
 		}
 	}
-	
+	private boolean enabled(String plname) {
+		return getServer().getPluginManager().getPlugin("essentials") != null;
+	}
 	private void sendmes(CommandSender sender, String mes) {
 		sender.sendMessage(prefix + mes);
 	}
