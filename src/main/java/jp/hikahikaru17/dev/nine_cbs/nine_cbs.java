@@ -44,7 +44,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private final static String RANGE10 = ChatColor.GRAY +"(CBから半径10m以内のプレイヤー全員へ送信)"+ChatColor.RESET;
 	private final static String DEFAULT_SELECTER = "@p[r=10]";
 	private final static String ALL_SELECTER = "@a[r=10]";
-	private final static String VERSION = "1.8.6";
+	private final static String VERSION = "1.8.8";
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
 	private final static String CLAIMED = "保護されています！";
 	private final static int CBHELP_MAXPAGE = 3;
@@ -355,7 +355,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					sendmes(sender,"NULL: player");
 					return true;
 				} else {
-					for (int i=0;i <= args.length;i++) {
+					for (int i=0;i <= args.length-1;i++) {
 						if (i == 0) {
 							setCommand += DEFAULT_SELECTER;
 						}
@@ -373,7 +373,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			setCB(args,0,2,sender,String.format("/minecraft:title %s title %s",DEFAULT_SELECTER,args[0]));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbsubtitle")) {
-			setCB(args,0,2,sender,String.format("/minecraft:subtitle %s title %s",DEFAULT_SELECTER,args[0]));
+			setCB(args,0,2,sender,String.format("/minecraft:title %s subtitle %s",DEFAULT_SELECTER,args[0]));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbeffect")) {
 			String setCommand = "minecraft:playsound "+DEFAULT_SELECTER;
@@ -620,7 +620,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		sender.sendMessage(prefix + mes);
 	}
 	private String notEnabledPL(String plname) {
-		return String.format("%s は有効化されていないようです。管理者へお問い合わせください。",plname);
+		return String.format("%s は有効化されていないようです。\n管理者へお問い合わせください。",plname);
 	}
 	/*
 	 * @deprecated you can use ChatColor.translateAlternateColorCodes('&',mes)
