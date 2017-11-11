@@ -1,5 +1,5 @@
 name: nine_cb
-version: 1.8.8
+version: 1.8.9
 description: nine_cb
 author: lolita_is_god
 website: ~
@@ -79,6 +79,9 @@ commands:
         usage: '/<command>'
     uncmb:
         description: remove cb
+        usage: '/<command>'
+    umcnd:
+        description: ""
         usage: '/<command>'
 
         
