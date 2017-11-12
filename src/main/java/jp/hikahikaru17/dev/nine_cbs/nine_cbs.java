@@ -45,7 +45,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private final static String RANGE10 = ChatColor.GRAY +"(CBから半径10m以内のプレイヤー全員へ送信)"+ChatColor.RESET;
 	private final static String DEFAULT_SELECTER = "@p[r=10]";
 	private final static String ALL_SELECTER = "@a[r=10]";
-	private final static String VERSION = "1.8.8";
+	private final static String VERSION = "1.9";
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
 	private final static String CLAIMED = "保護されています！";
 	private final static int CBHELP_MAXPAGE = 3;
@@ -467,9 +467,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			if (getWorldGuard() == null) {
 				sendmes(sender,notEnabledPL("WorldGuard"));
 				return true;
-			}
-			
-			if (getWorldGuard().canBuild(player, player.getLocation()) != true) {
+			} else if (getWorldGuard().canBuild(player, player.getLocation()) != true) {
 				sender.sendMessage(CLAIMED);
 				return true;
 			}
@@ -477,10 +475,12 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			int sprad = getServer().getSpawnRadius();
 			double px = loc.getX();
 			double py = loc.getY();
-
 			double pz = loc.getZ();
-			BlockVector min = new BlockVector(px-sprad,0,pz-sprad);
-			BlockVector max = new BlockVector(px+sprad,255,pz+sprad);
+			Location spawnCenter = loc.getWorld().getSpawnLocation();
+			double sx = spawnCenter.getX();
+			double sz = spawnCenter.getZ();
+			BlockVector min = new BlockVector(sx-sprad,0,sz-sprad);
+			BlockVector max = new BlockVector(sx+sprad,255,sz+sprad);
 			if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
 				player.getLocation().getBlock().setType(Material.COMMAND);
 				getCoreProtect().logPlacement(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); //CORE PROTECT
@@ -530,8 +530,12 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			} else {
 				sendmes(sender,notEnabledPL("essentials"));
 			}
-		} else if (cmdname.equalsIgnoreCase("cbmenu")) {
-			setCB(args,0,2,sender,String.format("/mmopen %s %s",args[0],DEFAULT_SELECTER));
+		} else if (cmdname.equalsIgnoreCase("cbactionbar")) {
+			setCB(args,0,2,sender,String.format("minecraft:title %s actionbar %s",DEFAULT_SELECTER,String.join(" ",args)));
+		} else if (cmdname.equalsIgnoreCase("cbactionbar-a")) {
+			setCB(args,0,2,sender,String.format("minecraft:title %s actionbar %s",ALL_SELECTER,String.join(" ",args)));
+		} else if (cmdname.equalsIgnoreCase("cbback")) {
+			setCB(args,0,2,sender,"back");
 		}
 		/**/
 		return false;//該当コマンドなし
