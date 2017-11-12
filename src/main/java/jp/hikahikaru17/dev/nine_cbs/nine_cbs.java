@@ -80,6 +80,9 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		getCommand("cmb").setExecutor(this);
 		getCommand("cmd").setExecutor(this);
 		getCommand("uncmb").setExecutor(this);
+		getCommand("cbactionbar").setExecutor(this);
+		getCommand("cbactionbar-a").setExecutor(this);
+		getCommand("cbback").setExecutor(this);
 		//this.getServer().getPluginManager().registerEvents(new MyListenerClass(), this));
 	}
 
