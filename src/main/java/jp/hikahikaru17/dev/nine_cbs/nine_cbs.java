@@ -37,6 +37,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
  */
 
 public class nine_cbs extends JavaPlugin implements CommandExecutor{
+	public static HashMap<String,Location> deathLocation = new HashMap<>();
 	private final static String prefix = ChatColor.DARK_AQUA + "" + "[Nine_CB] " + ChatColor.RESET;
 	private final static String MUST_BE_PLAYER = "Canceled (MUST BE PLAYER)";
 	private final static String TOO_FEW_ARGS = "引数が少なすぎます";
@@ -45,11 +46,11 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private final static String RANGE10 = ChatColor.GRAY +"(CBから半径10m以内のプレイヤー全員へ送信)"+ChatColor.RESET;
 	private final static String DEFAULT_SELECTER = "@p[r=10]";
 	private final static String ALL_SELECTER = "@a[r=10]";
-	private final static String VERSION = "1.8.8";
+	private final static String VERSION = "1.9";
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
 	private final static String CLAIMED = "保護されています！";
 	private final static int CBHELP_MAXPAGE = 3;
-	private final static boolean DEBUG = true;
+	public final static boolean DEBUG = true;
 	@Override
 	public void onEnable() {
 		getLogger().info("test enable");
@@ -80,6 +81,9 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		getCommand("cmb").setExecutor(this);
 		getCommand("cmd").setExecutor(this);
 		getCommand("uncmb").setExecutor(this);
+		getCommand("cbactionbar").setExecutor(this);
+		getCommand("cbactionbar-a").setExecutor(this);
+		getCommand("cbback").setExecutor(this);
 		//this.getServer().getPluginManager().registerEvents(new MyListenerClass(), this));
 	}
 
@@ -467,9 +471,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			if (getWorldGuard() == null) {
 				sendmes(sender,notEnabledPL("WorldGuard"));
 				return true;
-			}
-			
-			if (getWorldGuard().canBuild(player, player.getLocation()) != true) {
+			} else if (getWorldGuard().canBuild(player, player.getLocation()) != true) {
 				sender.sendMessage(CLAIMED);
 				return true;
 			}
@@ -477,10 +479,12 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			int sprad = getServer().getSpawnRadius();
 			double px = loc.getX();
 			double py = loc.getY();
-
 			double pz = loc.getZ();
-			BlockVector min = new BlockVector(px-sprad,0,pz-sprad);
-			BlockVector max = new BlockVector(px+sprad,255,pz+sprad);
+			Location spawnCenter = loc.getWorld().getSpawnLocation();
+			double sx = spawnCenter.getX();
+			double sz = spawnCenter.getZ();
+			BlockVector min = new BlockVector(sx-sprad,0,sz-sprad);
+			BlockVector max = new BlockVector(sx+sprad,255,sz+sprad);
 			if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
 				player.getLocation().getBlock().setType(Material.COMMAND);
 				getCoreProtect().logPlacement(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); //CORE PROTECT
@@ -530,8 +534,19 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			} else {
 				sendmes(sender,notEnabledPL("essentials"));
 			}
-		} else if (cmdname.equalsIgnoreCase("cbmenu")) {
-			setCB(args,0,2,sender,String.format("/mmopen %s %s",args[0],DEFAULT_SELECTER));
+			return true;
+		} else if (cmdname.equalsIgnoreCase("cbactionbar")) {
+			setCB(args,0,2,sender,String.format("minecraft:title %s actionbar %s",DEFAULT_SELECTER,String.join(" ",args)));
+			return true;
+		} else if (cmdname.equalsIgnoreCase("cbactionbar-a")) {
+			setCB(args,0,2,sender,String.format("minecraft:title %s actionbar %s",ALL_SELECTER,String.join(" ",args)));
+			return true;
+		} else if (cmdname.equalsIgnoreCase("cbback")) {
+			setCB(args,0,2,sender,"/nine_cbs:back");
+			return true;	
+		} else if (cmdname.equalsIgnoreCase("back")) {
+			executeCommand(String.format("minecraft:tp %s %d %d %d",pa,deathLocation.get(pa).getBlockX(),deathLocation.get(pa).getBlockY(),deathLocation.get(pa).getBlockZ()));
+			return true;
 		}
 		/**/
 		return false;//該当コマンドなし
@@ -646,6 +661,9 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	}
 	private String notEnabledPL(String plname) {
 		return String.format("%s は有効化されていないようです。\n管理者へお問い合わせください。",plname);
+	}
+	private void executeCommand(String cmd) {
+		getServer().dispatchCommand(getServer().getConsoleSender(), cmd);
 	}
 	/*
 	 * @deprecated you can use ChatColor.translateAlternateColorCodes('&',mes)

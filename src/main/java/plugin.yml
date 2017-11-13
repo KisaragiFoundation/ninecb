@@ -1,5 +1,5 @@
 name: nine_cb
-version: 1.8.9
+version: 1.9
 description: nine_cb
 author: lolita_is_god
 website: ~
@@ -12,7 +12,7 @@ commands:
         description: tell you help for CMD
         usage: '/<command>'
     cbwarp:
-        description: warp to somewhere (FOR CB)
+        description: warp to somewhere (FOR CB) (need essentials)
         usage: '/<command>'
     cbgm:
         description: change gamemode (FOR CB)
@@ -80,8 +80,17 @@ commands:
     uncmb:
         description: remove cb
         usage: '/<command>'
-    umcnd:
-        description: ""
+    umcmd:
+        description: none
+        usage: '/<command>'
+    cbactionbar:
+        description: action bar
+        usage: '/<command>'
+    cbactionbar-a:
+        description: actionbar
+        usage: '/<command>'
+    cbback:
+        description: back (need essentials)
         usage: '/<command>'
 
         
