@@ -37,6 +37,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
  */
 
 public class nine_cbs extends JavaPlugin implements CommandExecutor{
+	public static HashMap<String,Location> deathLocation = new HashMap<>();
 	private final static String prefix = ChatColor.DARK_AQUA + "" + "[Nine_CB] " + ChatColor.RESET;
 	private final static String MUST_BE_PLAYER = "Canceled (MUST BE PLAYER)";
 	private final static String TOO_FEW_ARGS = "引数が少なすぎます";
@@ -49,7 +50,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
 	private final static String CLAIMED = "保護されています！";
 	private final static int CBHELP_MAXPAGE = 3;
-	private final static boolean DEBUG = true;
+	public final static boolean DEBUG = true;
 	@Override
 	public void onEnable() {
 		getLogger().info("test enable");
@@ -538,7 +539,9 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		} else if (cmdname.equalsIgnoreCase("cbactionbar-a")) {
 			setCB(args,0,2,sender,String.format("minecraft:title %s actionbar %s",ALL_SELECTER,String.join(" ",args)));
 		} else if (cmdname.equalsIgnoreCase("cbback")) {
-			setCB(args,0,2,sender,"back");
+			setCB(args,0,2,sender,"/nine_cbs:back");
+		} else if (cmdname.equalsIgnoreCase("back")) {
+			executeCommand(String.format("minecraft:tp %s %d %d %d",pa,deathLocation.get(pa).getBlockX(),deathLocation.get(pa).getBlockY(),deathLocation.get(pa).getBlockZ()));
 		}
 		/**/
 		return false;//該当コマンドなし
@@ -653,6 +656,9 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	}
 	private String notEnabledPL(String plname) {
 		return String.format("%s は有効化されていないようです。\n管理者へお問い合わせください。",plname);
+	}
+	private void executeCommand(String cmd) {
+		getServer().dispatchCommand(getServer().getConsoleSender(), cmd);
 	}
 	/*
 	 * @deprecated you can use ChatColor.translateAlternateColorCodes('&',mes)
