@@ -534,14 +534,19 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			} else {
 				sendmes(sender,notEnabledPL("essentials"));
 			}
+			return true;
 		} else if (cmdname.equalsIgnoreCase("cbactionbar")) {
 			setCB(args,0,2,sender,String.format("minecraft:title %s actionbar %s",DEFAULT_SELECTER,String.join(" ",args)));
+			return true;
 		} else if (cmdname.equalsIgnoreCase("cbactionbar-a")) {
 			setCB(args,0,2,sender,String.format("minecraft:title %s actionbar %s",ALL_SELECTER,String.join(" ",args)));
+			return true;
 		} else if (cmdname.equalsIgnoreCase("cbback")) {
 			setCB(args,0,2,sender,"/nine_cbs:back");
+			return true;	
 		} else if (cmdname.equalsIgnoreCase("back")) {
 			executeCommand(String.format("minecraft:tp %s %d %d %d",pa,deathLocation.get(pa).getBlockX(),deathLocation.get(pa).getBlockY(),deathLocation.get(pa).getBlockZ()));
+			return true;
 		}
 		/**/
 		return false;//該当コマンドなし
