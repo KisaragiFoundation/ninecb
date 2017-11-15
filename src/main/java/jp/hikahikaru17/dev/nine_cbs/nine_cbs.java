@@ -39,18 +39,25 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	public static HashMap<String,Location> deathLocation = new HashMap<>();
 	private final static String prefix = ChatColor.DARK_AQUA + "" + "[Nine_CB] " + ChatColor.RESET;
-	private final static String MUST_BE_PLAYER = "Canceled (MUST BE PLAYER)";
-	private final static String TOO_FEW_ARGS = "引数が少なすぎます";
-	private final static String TOO_MANY_ARGS = "引数が多すぎます";
+	static final String MUST_BE_PLAYER = "Canceled (MUST BE PLAYER)";
+	static final String TOO_FEW_ARGS = "引数が少なすぎます";
+	static final String TOO_MANY_ARGS = "引数が多すぎます";
 	private final static String COMMAND_TRIGER = "コマンドブロックの上に立って実行するとコマンドが入ります";
 	private final static String RANGE10 = ChatColor.GRAY +"(CBから半径10m以内のプレイヤー全員へ送信)"+ChatColor.RESET;
 	private final static String DEFAULT_SELECTER = "@p[r=10]";
 	private final static String ALL_SELECTER = "@a[r=10]";
 	private final static String VERSION = "1.9";
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
-	private final static String CLAIMED = "保護されています！";
+	static final String CLAIMED = "保護されています！";
 	private final static int CBHELP_MAXPAGE = 3;
 	public final static boolean DEBUG = true;
+	public api API;
+	public externalPlugin EP;
+
+	public nine_cbs() {
+		this.EP = new externalPlugin();
+		this.API = new api();
+	}
 	@Override
 	public void onEnable() {
 		getLogger().info("test enable");
@@ -244,6 +251,8 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					helpmes += String.format("%s/cbtitle-a <walk|fly> <0~10>%s%s", linebegin, RANGE10, lineend);
 					helpmes += String.format("%s/cbsubtitle-a <メニュー名>%s%s", linebegin, RANGE10, lineend);
 					helpmes += String.format("%s/cbback <enable|disable>%s", linebegin, lineend);
+					helpmes += String.format("%s/cbactionbar <メッセージ>%s", linebegin, lineend);
+					helpmes += String.format("%s/cbactionbar-a <enable|disable>%s", linebegin, lineend);
 					//
 					helpmes += RETACS(3);
 					break;
@@ -299,22 +308,6 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbtp")) {
-			/*if (args.length < 3) {
-				sendmes(sender,TOO_FEW_ARGS);
-				return true;
-			}
-			if (isPlayer) {
-				if (player == null) {
-					sendmes(sender,"NULL: player");
-				} else {
-					changesCB(player.getLocation(), String.format("minecraft:tp %s %s %s %s",DEFAULT_SELECTER,args[0],args[1],args[2]),player.getName());
-					return true;
-				}
-			} else {
-				sendmes(sender,MUST_BE_PLAYER);
-				return true;
-			}
-			*/
 			setCB(args, 3, args.length, sender, String.format("minecraft:tp %s %s %s %s",DEFAULT_SELECTER,args[0],args[1],args[2]));
 			return true;	
 		} else if (cmdname.equalsIgnoreCase("cbgive")) {
@@ -462,16 +455,21 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			//WORLD GUARD CHECK
 			if (DEBUG) {
 				getLogger().info(String.format("%3.2f,%d",player.getLocation().getY(),player.getLocation().getBlockY()));
-			}			
+			}
+			if (API.canBuild(null, player)) {
+				player.getLocation().getBlock().setType(Material.COMMAND);
+				EP.getCoreProtect().logPlacement(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); //CORE PROTECT				
+			}
+			/*
 			Location loc = player.getLocation();
 			loc.setY(loc.getY()-1);
 			if (DEBUG) {
 				getLogger().info(String.format("%s",player.getLocation().getBlockY()));
 			}
-			if (getWorldGuard() == null) {
+			if (EP.getWorldGuard() == null) {
 				sendmes(sender,notEnabledPL("WorldGuard"));
 				return true;
-			} else if (getWorldGuard().canBuild(player, player.getLocation()) != true) {
+			} else if (EP.getWorldGuard().canBuild(player, player.getLocation()) != true) {
 				sender.sendMessage(CLAIMED);
 				return true;
 			}
@@ -486,9 +484,9 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			BlockVector min = new BlockVector(sx-sprad,0,sz-sprad);
 			BlockVector max = new BlockVector(sx+sprad,255,sz+sprad);
 			if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
-				player.getLocation().getBlock().setType(Material.COMMAND);
-				getCoreProtect().logPlacement(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); //CORE PROTECT
+
 			}
+			*/
 			return true;
 		} else if (cmdname.equalsIgnoreCase("uncmd")) {
 			sendmes(sender,"もしかして: cmb");
@@ -500,12 +498,12 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				return true;
 			}
 			//WORLD GUARD CHECK
-			if (getWorldGuard() == null) {
+			if (EP.getWorldGuard() == null) {
 				sendmes(sender,notEnabledPL("WorldGuard"));
 				return true;
 			}
 			
-			if (getWorldGuard().canBuild(player, player.getLocation()) != true) {
+			if (EP.getWorldGuard().canBuild(player, player.getLocation()) != true) {
 				sender.sendMessage(CLAIMED);
 				return true;
 			}
@@ -522,7 +520,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			}
 			if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
 				player.getLocation().getBlock().setType(Material.AIR);
-				getCoreProtect().logRemoval(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); 			//CORE PROTECT
+				EP.getCoreProtect().logRemoval(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); 			//CORE PROTECT
 			}
 			return true;
 
@@ -545,6 +543,12 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			setCB(args,0,2,sender,"/nine_cbs:back");
 			return true;	
 		} else if (cmdname.equalsIgnoreCase("back")) {
+			getLogger().info(pa);
+			if ("#".equals(pa)) {
+				sendmes(sender,MUST_BE_PLAYER);
+				return true;
+			}
+			getLogger().info(String.format("minecraft:tp %s %d %d %d",pa,deathLocation.get(pa).getBlockX(),deathLocation.get(pa).getBlockY(),deathLocation.get(pa).getBlockZ()));
 			executeCommand(String.format("minecraft:tp %s %d %d %d",pa,deathLocation.get(pa).getBlockX(),deathLocation.get(pa).getBlockY(),deathLocation.get(pa).getBlockZ()));
 			return true;
 		}
@@ -558,31 +562,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	 */
 
 	private void setCB(String args[], int toofew, int toomany, CommandSender sender, String command){
-		boolean isPlayer = sender instanceof Player;
-		Player player = null;
-		if (isPlayer) {
-			player = (Player)sender;
-		}
-		if (args.length < toofew) {
-			sendmes(sender,TOO_FEW_ARGS);
-			return;
-		}
-
-		if (args.length > toomany) {
-			sendmes(sender,TOO_MANY_ARGS);
-		}
-		if (isPlayer) {
-			if (player == null) {
-				sendmes(sender,"NULL: player");
-			} else {
-				changesCB(player.getLocation(), command,player.getName());
-				logging(player.getLocation(), "".equals(getsCB(player.getLocation())) ? "input" : "change", command, player.getName());
-				return;
-			}
-		} else {
-			sendmes(sender,MUST_BE_PLAYER);
-			return;
-		}
+		API.setCB(args, toofew, toomany, sender, command);
 	}
 	
 	private String getsCB(Location blockLocate) {
@@ -598,70 +578,24 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	}
 
 	private void changesCB(Location blockLocate, String command, String playerName) {
-		blockLocate.setY(blockLocate.getY()-1);
-		if (blockLocate.getBlock().getType() == Material.COMMAND) {
-			CommandBlock cb = (CommandBlock)blockLocate.getBlock().getState();
-			cb.setCommand(command); // コマンドをセット
-			cb.update(true); // 反映させる
-			logging(blockLocate,"change",command,playerName);
-		}
+		API.changeCB(blockLocate, command, playerName);
 	}
 	
 	private void logging(Location blockLocate, String action, String desc, String player) {
-		try {
-		/*
-		case "log":
-		if (player != null) {
-		logging(player.getLocation(),"test","minecraft:tell @p this is testing (really test!!!!!!!)");	<--- ERROR					
-		}
-		sendmes(sender,"There is no logs.");
-		return true;
-		*/
-			final String BASE_PATH = "plugins/ninecb/blocklog/";
-			final String FILE_NAME = String.format("%d_%d_%d.yml",blockLocate.getBlockX(),(int)(blockLocate.getY()-1),(int)blockLocate.getZ());
-			File newdir = new File(BASE_PATH);
-			if (newdir.exists()) {
-				NOP();
-			} else {
-				newdir.mkdir();
-			}
-			File f = new File(BASE_PATH + FILE_NAME);
-			YamlConfiguration yamlFile = YamlConfiguration.loadConfiguration(f);
-					int i;
-					//if (yamlFile.get("log0") == null) {yamlFile.createSection("log0");}
-					for (i=0;i <= 999999;i ++) {
-						if (yamlFile.get(String.format("log%d",i)) == null) {break;}
-					}
-					HashMap<String,String> properties = new HashMap<>();
-					Long ms = System.currentTimeMillis();
-					
-					properties.put("time",ms.toString());
-					properties.put("action",action);
-					properties.put("after", desc);
-					properties.put("player",player);
-
-					yamlFile.set(String.format("log%d",i),properties);
-			try {
-				getLogger().log(Level.INFO,"TRYING SAVE TO " + BASE_PATH + "{0}", FILE_NAME);
-				yamlFile.save(BASE_PATH + FILE_NAME);
-			} catch (IOException e) {
-				getLogger().warning("FAILED SAVING FILE");
-			}
-			
-		} catch (RuntimeException e) {
-			getLogger().warning("ERROR OCUSED : RUNTIME EXEPTION");
-			e.printStackTrace();
-		}
+		API.log(blockLocate, action, desc, player);
 	}
 	private boolean enabled(String plname) {
-		return getServer().getPluginManager().getPlugin("essentials") != null;
+		return getServer().getPluginManager().getPlugin(plname) != null;
 	}
-	private void sendmes(CommandSender sender, String mes) {
+	
+	static void sendmes(CommandSender sender, String mes) {
 		sender.sendMessage(prefix + mes);
 	}
+	
 	private String notEnabledPL(String plname) {
 		return String.format("%s は有効化されていないようです。\n管理者へお問い合わせください。",plname);
 	}
+	
 	private void executeCommand(String cmd) {
 		getServer().dispatchCommand(getServer().getConsoleSender(), cmd);
 	}
@@ -669,50 +603,15 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	 * @deprecated you can use ChatColor.translateAlternateColorCodes('&',mes)
 	 */
 
-
-	private WorldGuardPlugin getWorldGuard() {
-		Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
-
-		// WorldGuard may not be loaded
-		if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
-			return null; // Maybe you want throw an exception instead
-		}
-
-		return (WorldGuardPlugin) plugin;
-	}
-	
-	private CoreProtectAPI getCoreProtect() {
-		Plugin plugin = getServer().getPluginManager().getPlugin("CoreProtect");
-
-		// Check that CoreProtect is loaded
-		if (plugin == null || !(plugin instanceof CoreProtect)) {
-			return null;
-		}
-
-		// Check that the API is enabled
-		CoreProtectAPI CoreProtect = ((CoreProtect)plugin).getAPI();
-		if (CoreProtect.isEnabled()==false){
-			return null;
-		}
-		// Check that a compatible version of the API is loaded
-		if (CoreProtect.APIVersion() < 4){
-			return null;
-		}
-
-		return CoreProtect;
-	}
 	private static String ChatColorBuilder(String mes){ //mes is like "&8&m cake is a lie"
 		String ret = "";
 		return ChatColor.translateAlternateColorCodes('&',mes);
 	} // end
 
-
-
 	private void NOP() {
 		// No Operation
 	}
 	
-
 	/*********************************************************************************************
 	 *      文字列の指定された位置から、指定された文字数分の文字列を返します。
 	 *
