@@ -10,14 +10,16 @@ import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import static org.bukkit.Bukkit.getServer;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 
 /**
  *
  * @author Obsidian550D
  */
 public class externalPlugin {
+	private static final PluginManager PM = getServer().getPluginManager();
 	public CoreProtectAPI getCoreProtect() {
-		Plugin plugin = getServer().getPluginManager().getPlugin("CoreProtect");
+		Plugin plugin = PM.getPlugin("CoreProtect");
 
 		// Check that CoreProtect is loaded
 		if (plugin == null || !(plugin instanceof CoreProtect)) {
@@ -36,16 +38,16 @@ public class externalPlugin {
 
 		return CoreProtect;
 	}
-	
+
 	public WorldGuardPlugin getWorldGuard() {
-		Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
+		Plugin plugin = PM.getPlugin("WorldGuard");
 		if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
 			return null;
 		}
 
 		return (WorldGuardPlugin) plugin;
 	}
-	
+
 	public String notEnabledPL(String plname) {
 		return String.format("%s は有効化されていないようです。\n管理者へお問い合わせください。",plname);
 	}

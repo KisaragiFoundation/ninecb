@@ -26,10 +26,15 @@ import org.bukkit.util.BlockVector;
  */
 public class api {
 	final externalPlugin EP = new externalPlugin();
-	
+
 	/*
-	
+		@author
 	*/
+
+	public boolean isPlayer(CommandSender s){
+		return (s instanceof Player);
+	}
+
 	public boolean canBuild(Location l, Player p) {
 		CommandSender sender = (CommandSender)p;
 		if (EP.getWorldGuard() != null) {
@@ -38,54 +43,53 @@ public class api {
 			}
 		}
 
-			l.setY(l.getY()-1);
-			if (DEBUG) {
-				getLogger().info(String.format("%s",p.getLocation().getBlockY()));
-			}
-			if (EP.getWorldGuard() == null) {
-				nine_cbs.sendmes((CommandSender)p,EP.notEnabledPL("WorldGuard"));
-				return true;
-			} else if (EP.getWorldGuard().canBuild(p, l) != true) {
-				sender.sendMessage(nine_cbs.CLAIMED);
-				return true;
-			}
-			//CHECK SPAWN PROTECTION
-			int sprad = getServer().getSpawnRadius();
-			double px = l.getX();
-			double py = l.getY();
-			double pz = l.getZ();
-			Location spawnCenter = l.getWorld().getSpawnLocation();
-			double sx = spawnCenter.getX();
-			double sz = spawnCenter.getZ();
-			BlockVector min = new BlockVector(sx-sprad,0,sz-sprad);
-			BlockVector max = new BlockVector(sx+sprad,255,sz+sprad);
-			if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
-				return true;
-			}
+		l.setY(l.getY()-1);
+		if (DEBUG) {
+			getLogger().info(String.format("%s",p.getLocation().getBlockY()));
+		}
+		if (EP.getWorldGuard() == null) {
+			nine_cbs.sendmes((CommandSender)p,EP.notEnabledPL("WorldGuard"));
+			return true;
+		} else if (EP.getWorldGuard().canBuild(p, l) != true) {
+			sender.sendMessage(nine_cbs.CLAIMED);
+			return true;
+		}
+		//CHECK SPAWN PROTECTION
+		int sprad = getServer().getSpawnRadius();
+		double px = l.getX();
+		double py = l.getY();
+		double pz = l.getZ();
+		Location spawnCenter = l.getWorld().getSpawnLocation();
+		double sx = spawnCenter.getX();
+		double sz = spawnCenter.getZ();
+		BlockVector min = new BlockVector(sx-sprad,0,sz-sprad);
+		BlockVector max = new BlockVector(sx+sprad,255,sz+sprad);
+		if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
+			return true;
+		}
 		return false;
 	}
-			
+
 	/**
 	 *
-	 * @param args
-	 * @param toofew
-	 * @param toomany
-	 * @param sender
-	 * @param command
+	 * @param args a
+	 * @param toofew a
+	 * @param toomany a
+	 * @param sender a
+	 * @param command a
 	 */
-
 	protected void setCB(String args[], int toofew, int toomany, CommandSender sender, String command) {
 		boolean isPlayer = sender instanceof Player;
 		Player player = null;
 		if (isPlayer) {
 			player = (Player)sender;
 		}
-		if (args.length < toofew) {
+		if (args.length < toofew) { // 0 < 1
 			nine_cbs.sendmes(sender,nine_cbs.TOO_FEW_ARGS);
 			return;
 		}
 
-		if (args.length > toomany) {
+		if (args.length > toomany) { // 4 > 3
 			nine_cbs.sendmes(sender,nine_cbs.TOO_MANY_ARGS);
 		}
 		if (isPlayer) {
@@ -98,14 +102,14 @@ public class api {
 			nine_cbs.sendmes(sender,nine_cbs.MUST_BE_PLAYER);
 		}
 	}
-	
-	/*
+
+	/**
+	* pがlにあるCBをcで置き換えたことにする
 	* @param l CBの座標
 	* @param c コマンド
 	* @param p プレイヤーの名前
-	* @since 2017
 	*/
-	
+
 	protected void changeCB(Location l, String c, String p){
 		l.setY(l.getY()-1);
 		if (getCB(l) != null) {
@@ -114,14 +118,14 @@ public class api {
 			log(l,"change",c,p);
 		}
 	}
-	
-	/*
+
+	/**
 	@param l CBの座標
 	@param act 行動
 	@param c コマンド
 	@param p プレイヤーの名前
 	*/
-	
+
 	protected void log(Location l, String act, String c, String p) {
 		try {
 			final String BASE_PATH = "plugins/ninecb/blocklog/";
@@ -140,7 +144,7 @@ public class api {
 					}
 					HashMap<String,String> properties = new HashMap<>();
 					Long ms = System.currentTimeMillis();
-					
+
 					properties.put("time",ms.toString());
 					properties.put("action",act);
 					properties.put("after", c);
@@ -153,39 +157,39 @@ public class api {
 			} catch (IOException e) {
 				getLogger().warning("FAILED SAVING FILE!");
 			}
-			
+
 		} catch (RuntimeException e) {
 			getLogger().warning("ERROR OCUSED : RUNTIME EXEPTION");
-		}	
+		}
 	}
-	
+
 	protected boolean isCB(Location l) {
 		return l.getBlock().getType() == Material.COMMAND;
 	}
-	
+
 	private CommandBlock getCB(Location l) {
 		if (!isCB(l)) {
 			return null;
 		}
 		return (CommandBlock)l.getBlock().getState();
 	}
-	
+
 	private void update (Location l) {
 		if (!isCB(l)) {
 			return;
 		}
 		getCB(l).update(true);
 	}
-	
+
 	protected boolean setCommand(Location l,String c) {
 		if (getCB(l) == null) {
 			return false;
 		}
-		
+
 		getCB(l).setCommand(c);
 		return true;
 	}
-	
+
 	protected String getCommand(Location l) {
 		if (getCB(l) == null) {
 			return "";
@@ -193,3 +197,4 @@ public class api {
 		return getCB(l).getCommand();
 	}
 }
+
