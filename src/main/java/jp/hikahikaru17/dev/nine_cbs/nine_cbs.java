@@ -31,13 +31,13 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private final static String RANGE10 = ChatColor.GRAY +"(CBから半径10m以内のプレイヤー全員へ送信)"+ChatColor.RESET;
 	private final static String DEFAULT_SELECTER = "@p[r=10]";
 	private final static String ALL_SELECTER = "@a[r=10]";
-	private final static String VERSION = "1.9";
+	private final static String VERSION = "1.9.1";
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
 	static final String CLAIMED = "保護されています！";
 	static final String NOT_ABLE_MODIFY = "この座標を編集する権限がありません。";
 	static final String UNKNOWN_GAMEMODE = "不明なゲームモードです。";
 	private final static int CBHELP_MAXPAGE = 3;
-	public final static boolean DEBUG = true;
+	public final static Boolean DEBUG = true;
 	public api API;
 	public externalPlugin EP;
 	public Logger LOG;
@@ -45,12 +45,12 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	public void nine_cbs() {
 		this.EP = new externalPlugin();
 		this.API = new api();
-		this.LOG = LOG;
+		this.LOG = getLogger();
 	}
 	@Override
 	public void onEnable() {
 		this.nine_cbs();
-		LOG.info("test enable");
+		//LOG.log(Level.INFO, "DEBUG MODE: {0}", (Object)DEBUG);
 		// コマンドを実行するプラグインをこれにするという設定
 		getCommand("cbhelp").setExecutor(this);
 		getCommand("cbwarp").setExecutor(this);
@@ -113,7 +113,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		if (cmdname.equalsIgnoreCase("ninecb")){
 			String sendmes;
 			if (args.length < 1) {
-				sendmes(sender,"引数を入力してください！");
+				errormes("引数を入力してください！",sender);
 				return true;
 			}
 			switch (args[0].toLowerCase()) {
@@ -298,12 +298,13 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				return true;
 			}
 		} else if (cmdname.equalsIgnoreCase("cbtell")) {
-			String tellMes = String.join(" ",args); // スペースで切れる対処
-			String newTellMes = "";
+			String tellMes = String.join(" ",args); // スペースで切れる対処・・・しかし働いていない模様
 			if (tellMes.contains("&")){  //装飾コードが含まれていたなら書き換え
 				tellMes = ChatColor.translateAlternateColorCodes('&',tellMes);
 			}
-			setCB(args,1,3,sender,String.format("/minecraft:tell %s %s",DEFAULT_SELECTER,tellMes));
+			LOG.info(tellMes);
+			LOG.info(String.format("/minecraft:tell %s %s",DEFAULT_SELECTER,tellMes));
+			setCB(args,1,args.length,sender,String.format("/minecraft:tell %s %s",DEFAULT_SELECTER,tellMes));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbsound")) {
 			String setCommand = "minecraft:playsound $1 $2 $3"; // $1 = src/ $2=master/ $3 = DEFAULT_SELECTER
@@ -325,7 +326,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					}
 					LOG.info(setCommand);
 					setCommand = setCommand.replace("$1",args[0]);
-					setCommand = setCommand.replace("$2","master");
+					setCommand = setCommand.replace("$2","master"); // 1.9 and later
 					setCommand = setCommand.replace("$3",DEFAULT_SELECTER);
 					setCB(args, 1, args.length, sender, setCommand);
 					return true;
@@ -590,6 +591,10 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		}
 		LOG.info(m);
 		sender.sendMessage(m);
+	}
+
+	private int to_i(boolean b) {
+		return (b == true ? 1 : 0);
 	}
 }
 

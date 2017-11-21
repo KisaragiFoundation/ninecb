@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import static jp.hikahikaru17.dev.nine_cbs.nine_cbs.DEBUG;
 import static org.bukkit.Bukkit.getLogger;
 import static org.bukkit.Bukkit.getServer;
@@ -25,7 +26,8 @@ import org.bukkit.util.BlockVector;
  * @author Obsidian550D
  */
 public class api {
-	final externalPlugin EP = new externalPlugin();
+	static final externalPlugin EP = new externalPlugin();
+	static final Logger LOG = getLogger();
 
 	/*
 		@author
@@ -96,6 +98,7 @@ public class api {
 			if (player == null) {
 				nine_cbs.sendmes(sender,"NULL: player");
 			} else {
+				LOG.info(command);
 				changeCB(player.getLocation(), command,player.getName());
 			}
 		} else {
