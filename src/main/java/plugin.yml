@@ -1,9 +1,9 @@
 name: nine_cb
-version: 1.9
+version: 1.9.1
 description: nine_cb
 author: lolita_is_god
 website: ~
-softdepend: [WorldGuard, CoreProtect]
+softdepend: [WorldGuard, CoreProtect, essentials, icJukeBox]
 #---
 main: jp.hikahikaru17.dev.nine_cbs.nine_cbs
 #---
@@ -53,6 +53,9 @@ commands:
     cbtpt:
         description: switch anybody can teleport you (FOR CB)
         usage: '/<command>'
+    cbfly:
+        description: switch anybody can teleport you (FOR CB)
+        usage: '/<command>'
     cbmusic:
         description: play music by player (FOR CB)
         usage: '/<command>'
@@ -91,6 +94,9 @@ commands:
         usage: '/<command>'
     cbback:
         description: back (need essentials)
+        usage: '/<command>'
+    back:
+        description: a
         usage: '/<command>'
 
         
