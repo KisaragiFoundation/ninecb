@@ -22,6 +22,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.util.BlockVector;
 
 public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	public static HashMap<String,Location> deathLocation = new HashMap<>();
@@ -40,6 +42,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	static final String CLAIMED = "保護されています！";
 	static final String NOT_ABLE_MODIFY = "この座標を編集する権限がありません。";
 	static final String UNKNOWN_GAMEMODE = "不明なゲームモードです。";
+	static final String NOT_CB = "コマンドブロックではありません。";
 	private final static int CBHELP_MAXPAGE = 3;
 	public final static Boolean DEBUG = true;
 	public static InternalAPI API;
@@ -443,13 +446,18 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				errormes(MUST_BE_PLAYER,sender);
 				return true;
 			}
-			//WORLD GUARD CHECK
+			Location loc = player.getLocation();
+			loc.setY(loc.getY()-1); // 足元
 			if (DEBUG) {
-				LOG.info(String.format("%3.2f,%d",player.getLocation().getY(),player.getLocation().getBlockY()));
+				LOG.info(String.format("%3.2f,%d",loc.getY(),loc.getBlockY()));
 			}
-			if (API.canBuild(player.getLocation(), player)) {
-				player.getLocation().getBlock().setType(Material.COMMAND);
-				EP.getCoreProtect().logPlacement(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); //CORE PROTECT
+			if (API.canBuild(loc, player)) {
+				if (API.isCB(loc)) {
+					loc.getBlock().setType(Material.COMMAND);
+					EP.getCoreProtect().logPlacement(player.getName(), loc, Material.COMMAND, (byte)0); //CORE PROTECT
+				} else {
+					errormes(NOT_CB,sender);
+				}
 			} else {
 				errormes(NOT_ABLE_MODIFY,sender);
 			}
@@ -458,22 +466,19 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			sendmes(sender,"/uncmbと打ってください。");
 			return true;
 		} else if (cmdname.equalsIgnoreCase("uncmb")) {
-			getServer().dispatchCommand(getServer().getConsoleSender(), "minecraft:tp "+ pa +"~ ~-1 ~");
 			if (player == null) {
 				errormes(MUST_BE_PLAYER,sender);
 				return true;
 			}
-
-			if (API.canBuild(player.getLocation(), player)) {
-				player.getLocation().getBlock().setType(Material.AIR);
-				EP.getCoreProtect().logRemoval(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); 			//CORE PROTECT
+			Location loc = player.getLocation();
+			loc.setY(loc.getY()-1); // 足元
+			if (API.canBuild(loc, player)) {
+				loc.getBlock().setType(Material.AIR);
+				EP.getCoreProtect().logRemoval(player.getName(), loc, Material.COMMAND, (byte)0); 			//CORE PROTECT
 			} else {
 				errormes(NOT_ABLE_MODIFY,sender);
 			}
 			return true;
-
-
-
 		} else if (cmdname.equalsIgnoreCase("cbwarp")) {
 			if (enabled("essentials")) {
 				setCB(args,0,2,sender,String.format("/warp %s %s",args[0],DEFAULT_SELECTER));
@@ -619,7 +624,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				return false;
 			}
 		//CHECK SPAWN PROTECTION
-			/*
+
 			int sprad = Bukkit.getServer().getSpawnRadius();
 			double px = l.getX();
 			double py = l.getY();
@@ -632,7 +637,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
 				return true;
 			}
-			*/
+
 			return false;
 		}
 
