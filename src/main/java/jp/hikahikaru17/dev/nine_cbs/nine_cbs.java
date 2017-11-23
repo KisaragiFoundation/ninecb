@@ -5,9 +5,8 @@
  */
 package jp.hikahikaru17.dev.nine_cbs;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -19,59 +18,39 @@ import org.bukkit.block.CommandBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
-import com.sk89q.worldguard.bukkit.*;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.util.BlockVector;
-import net.coreprotect.*;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
-import net.minecraft.server.v1_12_R1.IChatBaseComponent;
-import net.minecraft.server.v1_12_R1.IChatBaseComponent.ChatSerializer;
-import net.minecraft.server.v1_12_R1.PacketPlayOutChat;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
-/*
-import com.sk89q.worldguard.bukkit.RegionContainer;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-*/
-/**
- *
- * @author Obsidian550D
- */
 
 public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	public static HashMap<String,Location> deathLocation = new HashMap<>();
 	private final static String prefix = ChatColor.DARK_AQUA + "" + "[Nine_CB] " + ChatColor.RESET;
-	private final static String prefixError = ChatColor.RED + "" + "[Nine_CB] " + ChatColor.RESET;	
-	static final String MUST_BE_PLAYER = "Canceled (MUST BE PLAYER)";
+	private final static String prefixError = ChatColor.RED + "" + "[Nine_CB] " + ChatColor.RESET;
+	static final String MUST_BE_PLAYER = "プレイヤーから発動する必要があります。";
 	static final String TOO_FEW_ARGS = "引数が少なすぎます";
 	static final String TOO_MANY_ARGS = "引数が多すぎます";
 	private final static String COMMAND_TRIGER = "コマンドブロックの上に立って実行するとコマンドが入ります";
 	private final static String RANGE10 = ChatColor.GRAY +"(CBから半径10m以内のプレイヤー全員へ送信)"+ChatColor.RESET;
 	private final static String DEFAULT_SELECTER = "@p[r=10]";
 	private final static String ALL_SELECTER = "@a[r=10]";
-	private final static String VERSION = "1.9";
+	private final static String VERSION = "1.9.1";
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
 	static final String CLAIMED = "保護されています！";
 	static final String NOT_ABLE_MODIFY = "この座標を編集する権限がありません。";
 	static final String UNKNOWN_GAMEMODE = "不明なゲームモードです。";
 	private final static int CBHELP_MAXPAGE = 3;
-	public final static boolean DEBUG = true;
+	public final static Boolean DEBUG = true;
 	public api API;
 	public externalPlugin EP;
+	public Logger LOG;
 
-	public nine_cbs() {
+	public void nine_cbs() {
 		this.EP = new externalPlugin();
 		this.API = new api();
+		this.LOG = getLogger();
 	}
 	@Override
 	public void onEnable() {
-		getLogger().info("test enable");
+		this.nine_cbs();
+		//LOG.log(Level.INFO, "DEBUG MODE: {0}", (Object)DEBUG);
 		// コマンドを実行するプラグインをこれにするという設定
 		getCommand("cbhelp").setExecutor(this);
 		getCommand("cbwarp").setExecutor(this);
@@ -107,7 +86,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 
 	@Override
 	public void onDisable() {
-		super.onDisable(); //getLogger().info("test disable");
+		super.onDisable(); //LOG.info("test disable");
 	}
 
 	@Override
@@ -134,49 +113,12 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		if (cmdname.equalsIgnoreCase("ninecb")){
 			String sendmes;
 			if (args.length < 1) {
-				sendmes(sender,"引数を入力してください！");
+				errormes("引数を入力してください！",sender);
 				return true;
 			}
 			switch (args[0].toLowerCase()) {
 				case "log":
-					if (player == null) {
-						sender.sendMessage(MUST_BE_PLAYER);
-						return true;
-					}
-					final Location locate = player.getLocation();
-					final String BASE_PATH = "plugins/ninecb/blocklog/";
-					final String FILE_NAME = String.format("%d_%d_%d.yml",locate.getBlockX(),(int)(locate.getY()-1),(int)locate.getZ());
-					getLogger().info(FILE_NAME);
-					final File f = new File(BASE_PATH + FILE_NAME);
-					YamlConfiguration yamlFile = YamlConfiguration.loadConfiguration(f);
-					String m = "";
-					double timesago;
-					int i;
-					for (i=0;i <= 999999;i ++) {
-						if (yamlFile.get(String.format("log%d",i)) == null) {break;}
-					}
-					m += "----"+ " Nine_cb/LOGS " + "----\n";
-					Long nowTime = System.currentTimeMillis();
-					for (int j=i-1;j >= 0;j -= 1) {
-						Long beforeTime = Long.parseLong(yamlFile.getString(String.format("log%d.time", j)));
-						//getLogger().info(String.format("[N,B,N-B]%d - %d = %d",nowTime,beforeTime,nowTime-beforeTime));
-						timesago = (double)((nowTime - beforeTime) / (1000*60*60)); //時間単位
-						//getLogger().info(yamlFile.getString(String.format("log%d.time", j)));
-						String l = "";
-						l += String.format("%.2f",((nowTime-beforeTime)/(60*60*1000d)));
-						getLogger().info(l);
-						m += l; // time
-						m += "/h ago : ";
-						m += yamlFile.getString(String.format("log%d.player", j)); // user
-						m += " ";
-						m += yamlFile.getString(String.format("log%d.action", j)); // action
-						m += " ";
-						m += yamlFile.getString(String.format("log%d.after",j)); //command
-						m += "\n";
-					}
-					//logging(player.getLocation(),"test","minecraft:tell @p this is testing (really test!!!!!!!)",player.getName());
-					getLogger().info(m);
-					sender.sendMessage(m);
+					showlog(sender);
 					return true;
 				case "help":
 					TextComponent message = new TextComponent("Ping");
@@ -201,8 +143,8 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				case "test":
 					if (args.length < 2) {
 						sendmes(sender,"テストする項目を入力してください！");
-						return true;	
-				}	
+						return true;
+				}
 					switch(args[1].toLowerCase()) {
 						/*case "colorbuilder":
 							if ((ChatColor.RESET+"a").equals(ChatColorBuilder("&ra"))) {
@@ -284,7 +226,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbwarp")) {
 			if (enabled("essentials")) {
-				setCB(args, 0, args.length, sender, String.format("warp %s",args[0]));				
+				setCB(args, 0, 1, sender, String.format("warp %s",args[0]));
 			} else {
 				errormes(notEnabledPL("essntials"),sender);
 			}
@@ -312,10 +254,10 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					args[0] = "spectator";
 					break;
 				default:
-					errormes("不明なゲームモードです。\nMinecraftで定義されている引数しか利用できません。",sender);
+					errormes(UNKNOWN_GAMEMODE,sender);
 					return true;
 			}
-			
+
 			if (DEBUG) {
 				sender.sendMessage(prefix + "GAMEMODE: " + args[0]);
 			}
@@ -332,8 +274,8 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbtp")) {
-			setCB(args, 3, args.length, sender, String.format("minecraft:tp %s %s %s %s",DEFAULT_SELECTER,args[0],args[1],args[2]));
-			return true;	
+			setCB(args, 3, 3, sender, String.format("minecraft:tp %s %s %s %s",DEFAULT_SELECTER,args[0],args[1],args[2]));
+			return true;
 		} else if (cmdname.equalsIgnoreCase("cbgive")) {
 			String setCommand = "minecraft:give "+DEFAULT_SELECTER;
 			if (args.length < 1) {
@@ -356,12 +298,13 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				return true;
 			}
 		} else if (cmdname.equalsIgnoreCase("cbtell")) {
-			String tellMes = String.join(" ",args); // スペースで切れる対処
-			String newTellMes = "";
+			String tellMes = String.join(" ",args); // スペースで切れる対処・・・しかし働いていない模様
 			if (tellMes.contains("&")){  //装飾コードが含まれていたなら書き換え
 				tellMes = ChatColor.translateAlternateColorCodes('&',tellMes);
 			}
-			setCB(args,1,3,sender,String.format("/minecraft:tell %s %s",DEFAULT_SELECTER,tellMes));
+			LOG.info(tellMes);
+			LOG.info(String.format("/minecraft:tell %s %s",DEFAULT_SELECTER,tellMes));
+			setCB(args,1,args.length,sender,String.format("/minecraft:tell %s %s",DEFAULT_SELECTER,tellMes));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbsound")) {
 			String setCommand = "minecraft:playsound $1 $2 $3"; // $1 = src/ $2=master/ $3 = DEFAULT_SELECTER
@@ -369,7 +312,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				errormes(TOO_FEW_ARGS,sender);
 				return true;
 			}
-			
+
 			if (isPlayer) {
 				if (player == null) {
 					sendmes(sender,"NULL: player");
@@ -381,9 +324,9 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					for (int i=1;i <= args.length-1;i++) {
 						setCommand += (" " + args[i]);
 					}
-					getLogger().info(setCommand);
+					LOG.info(setCommand);
 					setCommand = setCommand.replace("$1",args[0]);
-					setCommand = setCommand.replace("$2","master");
+					setCommand = setCommand.replace("$2","master"); // 1.9 and later
 					setCommand = setCommand.replace("$3",DEFAULT_SELECTER);
 					setCB(args, 1, args.length, sender, setCommand);
 					return true;
@@ -436,17 +379,20 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		} else if (cmdname.equalsIgnoreCase("cbgod") || cmdname.equalsIgnoreCase("cbfly") || cmdname.equalsIgnoreCase("cbtpt")) {
 			if (enabled("essentials")) {
 				if ("enable".equals(args[0].toLowerCase()) || "disable".equals(args[0].toLowerCase())) {
-					setCB(args,0,2,sender,String.format("/essentials:%s %s",cmdname.toLowerCase(),args[0]));					
+					setCB(args,0,2,sender,String.format("/essentials:%s %s",cmdname.toLowerCase(),args[0]));
 				} else {
 					errormes("第一引数はenableかdisableにしてください。",sender);
 				}
-
 			} else {
 				sendmes(sender,notEnabledPL("essentials"));
 			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbmusic")) {
-			setCB(args,0,2,sender,String.format("/music play %s %s",args[0],DEFAULT_SELECTER));
+			if (enabled("icJukeBox")){
+				setCB(args,0,2,sender,String.format("/music play %s %s",args[0],DEFAULT_SELECTER));
+			} else {
+				errormes(notEnabledPL("icJukeBox"),sender);
+			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbshot")) {
 			setCB(args,0,2,sender,String.format("/shot give %s %s",DEFAULT_SELECTER,args[0]));
@@ -470,13 +416,13 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			}
 			//WORLD GUARD CHECK
 			if (DEBUG) {
-				getLogger().info(String.format("%3.2f,%d",player.getLocation().getY(),player.getLocation().getBlockY()));
+				LOG.info(String.format("%3.2f,%d",player.getLocation().getY(),player.getLocation().getBlockY()));
 			}
 			if (API.canBuild(player.getLocation(), player)) {
 				player.getLocation().getBlock().setType(Material.COMMAND);
-				EP.getCoreProtect().logPlacement(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); //CORE PROTECT				
+				EP.getCoreProtect().logPlacement(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); //CORE PROTECT
 			} else {
-				sendmes(sender, ChatColor.RED+"ここには設置できません！");
+				errormes(NOT_ABLE_MODIFY,sender);
 			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("uncmd")) {
@@ -484,7 +430,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			return true;
 		} else if (cmdname.equalsIgnoreCase("uncmb")) {
 			getServer().dispatchCommand(getServer().getConsoleSender(), "minecraft:tp "+ pa +"~ ~-1 ~");
-			if (player==null) {
+			if (player == null) {
 				errormes(MUST_BE_PLAYER,sender);
 				return true;
 			}
@@ -493,7 +439,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				player.getLocation().getBlock().setType(Material.AIR);
 				EP.getCoreProtect().logRemoval(player.getName(), player.getLocation(), Material.COMMAND, (byte)0); 			//CORE PROTECT
 			} else {
-				sendmes(sender, ChatColor.RED+"ここで撤去はできません！");				
+				errormes(NOT_ABLE_MODIFY,sender);
 			}
 			return true;
 
@@ -514,19 +460,10 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbback")) {
 			sender.sendMessage("未サポート");//setCB(args,0,2,sender,"/nine_cbs:back");
-			return true;	
+			return true;
 		} else if (cmdname.equalsIgnoreCase("back")) {
 			sender.sendMessage("未サポート");
 			return true;
-			/*getLogger().info(pa);
-			if ("#".equals(pa)) {
-				errormes(MUST_BE_PLAYER,sender);
-				return true;
-			}
-			getLogger().info(String.format("minecraft:tp %s %d %d %d",pa,deathLocation.get(pa).getBlockX(),deathLocation.get(pa).getBlockY(),deathLocation.get(pa).getBlockZ()));
-			executeCommand(String.format("minecraft:tp %s %d %d %d",pa,deathLocation.get(pa).getBlockX(),deathLocation.get(pa).getBlockY(),deathLocation.get(pa).getBlockZ()));
-			return true;
-			*/
 		}
 		/**/
 		return false;//該当コマンドなし
@@ -540,7 +477,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private void setCB(String args[], int toofew, int toomany, CommandSender sender, String command){
 		API.setCB(args, toofew, toomany, sender, command);
 	}
-	
+
 	private String getsCB(Location blockLocate) {
 		if (blockLocate.getBlock().getType() != Material.COMMAND) {
 			return "";
@@ -556,41 +493,41 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private void changesCB(Location blockLocate, String command, String playerName) {
 		API.changeCB(blockLocate, command, playerName);
 	}
-	
+
 	private void logging(Location blockLocate, String action, String desc, String player) {
 		API.log(blockLocate, action, desc, player);
 	}
 	private boolean enabled(String plname) {
 		return getServer().getPluginManager().getPlugin(plname) != null;
 	}
-	
+
 	static void sendmes(CommandSender sender, String mes) {
 		sender.sendMessage(prefix + mes);
 	}
-	
+
 	private String notEnabledPL(String plname) {
 		return String.format("%s は有効化されていないようです。\n管理者へお問い合わせください。",plname);
 	}
-	
+
 	private void tellRaw(Player player, String str) {
 		// nop
 	}
-	
+
 	private void executeCommand(String cmd) {
 		getServer().dispatchCommand(getServer().getConsoleSender(), cmd);
 	}
-	/*
+	/** <!-- javadoc -->
+	 * @param mes ストライク！！！！
 	 * @deprecated you can use ChatColor.translateAlternateColorCodes('&',mes)
 	 */
 
 	private static String ChatColorBuilder(String mes){ //mes is like "&8&m cake is a lie"
 		return ChatColor.translateAlternateColorCodes('&',mes);
-	} // end
-
+	}
 	private void NOP() {
 		// No Operation
 	}
-	
+
 	/*********************************************************************************************
 	 *      文字列の指定された位置から、指定された文字数分の文字列を返します。
 	 *
@@ -606,13 +543,58 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		}
 		return stTarget.substring(iStart, iStart + iLength);
 	}
-	
-	/*public static final void sendunavaiable(CommandSender sendto) {
+
+	/** public static final void sendunavaiable(CommandSender sendto) {
 		sendto.SendMessage(prefix + " 未実装");
 	}*/
 
 	private void errormes(String s, CommandSender cs) {
 		cs.sendMessage(prefixError + s);
+	}
+
+	private void showlog(CommandSender sender) {
+		if (!API.isPlayer(sender)) {
+			sender.sendMessage(MUST_BE_PLAYER);
+			return;
+		}
+		Player player = (Player)sender;
+		final Location locate = player.getLocation();
+		final String BASE_PATH = "plugins/ninecb/blocklog/";
+		final String FILE_NAME = String.format("%d_%d_%d.yml",locate.getBlockX(),(int)(locate.getY()-1),(int)locate.getZ());
+		LOG.info(FILE_NAME);
+		final File f = new File(BASE_PATH + FILE_NAME);
+		YamlConfiguration yamlFile = YamlConfiguration.loadConfiguration(f);
+		String m = "";
+		double timesago;
+		int i;
+		for (i=0;i <= 999999;i ++) {
+			if (yamlFile.get(String.format("log%d",i)) == null) {break;}
+		}
+		m += "----"+ " Nine_cb/LOGS " + "----\n";
+		Long nowTime = System.currentTimeMillis();
+		for (int j=i-1;j >= 0;j -= 1) {
+			Long beforeTime = Long.parseLong(yamlFile.getString(String.format("log%d.time", j)));
+			//LOG.info(String.format("[N,B,N-B]%d - %d = %d",nowTime,beforeTime,nowTime-beforeTime));
+			timesago = (double)((nowTime - beforeTime) / (1000*60*60)); //時間単位
+			//LOG.info(yamlFile.getString(String.format("log%d.time", j)));
+			String l = "";
+			l += String.format("%.2f",((nowTime-beforeTime)/(60*60*1000d)));
+			LOG.info(l);
+			m += l; // time
+			m += "/h ago : ";
+			m += yamlFile.getString(String.format("log%d.player", j)); // user
+			m += " ";
+			m += yamlFile.getString(String.format("log%d.action", j)); // action
+			m += " ";
+			m += yamlFile.getString(String.format("log%d.after",j)); //command
+			m += "\n";
+		}
+		LOG.info(m);
+		sender.sendMessage(m);
+	}
+
+	private int to_i(boolean b) {
+		return (b == true ? 1 : 0);
 	}
 }
 
