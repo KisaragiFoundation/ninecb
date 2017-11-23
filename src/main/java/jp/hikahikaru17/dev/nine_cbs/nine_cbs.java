@@ -37,7 +37,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private final static String RANGE10 = ChatColor.GRAY +String.format("(CBから半径%dm以内のプレイヤー全員へ送信)",RANGE)+ChatColor.RESET;
 	private final static String DEFAULT_SELECTER = "@p[r=10]";
 	private final static String ALL_SELECTER = "@a[r="+RANGE+"]";
-	private final static String VERSION = "1.9.1";
+	private final static String VERSION = "1.9.2";
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
 	static final String CLAIMED = "保護されています！";
 	static final String NOT_ABLE_MODIFY = "この座標を編集する権限がありません。";
@@ -447,17 +447,16 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				return true;
 			}
 			Location loc = player.getLocation();
-			loc.setY(loc.getY()-1); // 足元
+			loc.setY(loc.getBlockY()-1); // 足元
 			if (DEBUG) {
 				LOG.info(String.format("%3.2f,%d",loc.getY(),loc.getBlockY()));
 			}
 			if (API.canBuild(loc, player)) {
 				if (API.isCB(loc)) {
-					loc.getBlock().setType(Material.COMMAND);
-					EP.getCoreProtect().logPlacement(player.getName(), loc, Material.COMMAND, (byte)0); //CORE PROTECT
-				} else {
-					errormes(NOT_CB,sender);
+					errormes("すでにコマンドブロックです！",sender);
 				}
+				loc.getBlock().setType(Material.COMMAND);
+				EP.getCoreProtect().logPlacement(player.getName(), loc, Material.COMMAND, (byte)0); //CORE PROTECT
 			} else {
 				errormes(NOT_ABLE_MODIFY,sender);
 			}
@@ -471,10 +470,14 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 				return true;
 			}
 			Location loc = player.getLocation();
-			loc.setY(loc.getY()-1); // 足元
+			loc.setY(loc.getBlockY()-1); // 足元
 			if (API.canBuild(loc, player)) {
-				loc.getBlock().setType(Material.AIR);
-				EP.getCoreProtect().logRemoval(player.getName(), loc, Material.COMMAND, (byte)0); 			//CORE PROTECT
+				if (API.isCB(loc)) {
+					loc.getBlock().setType(Material.AIR);
+					EP.getCoreProtect().logRemoval(player.getName(), loc, Material.COMMAND, (byte)0); //CORE PROTECT
+				} else {
+					errormes(NOT_CB,sender);
+				}
 			} else {
 				errormes(NOT_ABLE_MODIFY,sender);
 			}
@@ -509,7 +512,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	 */
 	protected static class InternalAPI {
 		public void setCB(String args[], int toofew, int toomany, CommandSender sender, String command){
-			if (DEBUG) LOG.info(String.format("{\"few\":%d,\"many\":%d,\"command\":%s}",toofew,toomany,command));
+			//if (DEBUG) LOG.info(String.format("{\"few\":%d,\"many\":%d,\"command\":%s}",toofew,toomany,command));
 			boolean isPlayer = isPlayer(sender);
 			Player player = null;
 			Location loc;
@@ -612,7 +615,6 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			if (EP.getWorldGuard() != null && EP.getWorldGuard().canBuild(p, p.getLocation()) == false) {
 				return false;
 			}
-			l.setY(l.getY()-1);
 			if (DEBUG) {
 				LOG.info(String.format("%s",p.getLocation().getBlockY()));
 			}
