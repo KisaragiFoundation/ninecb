@@ -37,7 +37,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private final static String RANGE10 = ChatColor.GRAY +String.format("(CBから半径%dm以内のプレイヤー全員へ送信)",RANGE)+ChatColor.RESET;
 	private final static String DEFAULT_SELECTER = "@p[r=10]";
 	private final static String ALL_SELECTER = "@a[r="+RANGE+"]";
-	private final static String VERSION = "1.9.2";
+	private final static String VERSION = "1.9.3";
 	private final static String TRIGGER = String.format("%s===%s %s %s===\n", ChatColor.AQUA, ChatColor.LIGHT_PURPLE, COMMAND_TRIGER, ChatColor.AQUA);
 	static final String CLAIMED = "保護されています！";
 	static final String NOT_ABLE_MODIFY = "この座標を編集する権限がありません。";
@@ -46,14 +46,19 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	private final static int CBHELP_MAXPAGE = 3;
 	public final static Boolean DEBUG = true;
 	public static InternalAPI API;
-	public static externalPlugin EP;
+	public static ExternalPlugin EP;
 	public static Logger LOG;
+	public static MCVersion VER;
+	public static ExternalPlugin.PluginName PLUGINNAMES;
 
 	public void nine_cbs() {
-		this.EP = new externalPlugin();
-		this.API = newAPI();
-		this.LOG = getLogger();
+		EP = new ExternalPlugin();
+		API = newAPI();
+		LOG = getLogger();
+		PLUGINNAMES = EP.NEW();
+		VER = new MCVersion();
 	}
+
 	@Override
 	public void onEnable() {
 		this.nine_cbs();
@@ -185,10 +190,13 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			String helpmes = "";
 			String lineend = ChatColor.RESET + "\n";
 			String linebegin = ChatColor.YELLOW + "";
+			String unavaiable = "" + ChatColor.GRAY + ChatColor.STRIKETHROUGH;
+			//String[] hmess = new String[100];
+
 			switch (args[0]) {
 				case "1":
 					helpmes += TRIGGER;
-					helpmes += String.format("%s/cbwarp <ワープ名>%s", linebegin, lineend);
+					helpmes += String.format("%s/cbwarp <ワープ名>%s", (enabled(PLUGINNAMES.ESSENTIALS) ? linebegin : unavaiable), lineend);
 					helpmes += String.format("%s/cbgm <0|1|2|3>%s", linebegin, lineend);
 					helpmes += String.format("%s/cbtp <x> <y> <z>%s", linebegin, lineend);
 					helpmes += String.format("%s/cbgive <アイテムID> [量] [データ値] [データタグ]%s", linebegin, lineend);
@@ -205,20 +213,20 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					helpmes += String.format("%s/cbxp <量|L <レベル>>%s", linebegin, lineend);
 					helpmes += String.format("%s/cbspeed <walk|fly> <0~10>%s", linebegin, lineend);
 					helpmes += String.format("%s/cbmenu <メニュー名>%s", linebegin, lineend); //mmopen $1 @p[r=10]
-					helpmes += String.format("%s/cbgod <enable|disable>%s", linebegin, lineend);
-					helpmes += String.format("%s/cbfly <enable|disable>%s", linebegin, lineend);
-					helpmes += String.format("%s/cbtpt <enable|disable>%s", linebegin, lineend);
-					helpmes += String.format("%s/cbmusic <曲名>%s", linebegin, lineend);
+					helpmes += String.format("%s/cbgod <enable|disable>%s", (enabled(PLUGINNAMES.ESSENTIALS) ? linebegin : unavaiable), lineend);
+					helpmes += String.format("%s/cbfly <enable|disable>%s", (enabled(PLUGINNAMES.ESSENTIALS) ? linebegin : unavaiable), lineend);
+					helpmes += String.format("%s/cbtpt <enable|disable>%s", (enabled(PLUGINNAMES.ESSENTIALS) ? linebegin : unavaiable), lineend);
+					helpmes += String.format("%s/cbmusic <曲名>%s", (enabled(PLUGINNAMES.ICJUKEBOX) ? linebegin : unavaiable), lineend);
 					//
 					helpmes += RETACS(2);
 					break;
 				case "3":
 					helpmes += TRIGGER;
-					helpmes += String.format("%s/cbshot <名前>%s", linebegin, lineend);
+					helpmes += String.format("%s/cbshot <名前>%s", ((enabled(PLUGINNAMES.CRACKSHOT) ? linebegin : unavaiable)) , lineend);
 					helpmes += String.format("%s/cbtell-a <メッセージ>%s%s", linebegin, RANGE10, lineend);
 					helpmes += String.format("%s/cbtitle-a <walk|fly> <0~10>%s%s", linebegin, RANGE10, lineend);
 					helpmes += String.format("%s/cbsubtitle-a <メニュー名>%s%s", linebegin, RANGE10, lineend);
-					helpmes += String.format("%s/cbback <enable|disable>%s", linebegin, lineend);
+					helpmes += String.format("%s/cbback <enable|disable>%s", /* linebegin */ unavaiable, lineend);
 					helpmes += String.format("%s/cbactionbar <メッセージ>%s", linebegin, lineend);
 					helpmes += String.format("%s/cbactionbar-a <enable|disable>%s", linebegin, lineend);
 					//
@@ -231,10 +239,10 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			sender.sendMessage(helpmes);
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbwarp")) {
-			if (enabled("essentials")) {
-				setCB(args, 0, 1, sender, String.format("warp %s",args[0]));
+			if (enabled(PLUGINNAMES.ESSENTIALS)) {
+				setCB(args, 0, 1, sender, String.format("warp %s %s",args[0],DEFAULT_SELECTER));
 			} else {
-				errormes(notEnabledPL("essntials"),sender);
+				errormes(notEnabledPL(PLUGINNAMES.ESSENTIALS),sender);
 			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbgm")) {
@@ -358,7 +366,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					}
 					LOG.info(setCommand);
 					setCommand = setCommand.replace("$1",args[0]);
-					setCommand = setCommand.replace("$2","master"); // 1.9 and later
+					setCommand = setCommand.replace("$2",VER.isLater(9) ? "master" : ""); // 1.8以前には存在しない！
 					setCommand = setCommand.replace("$3",DEFAULT_SELECTER);
 					setCB(args, 1, args.length, sender, setCommand);
 					return true;
@@ -399,35 +407,44 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			setCB(args,0,2,sender,String.format("/minecraft:xp %s %s",args[0],DEFAULT_SELECTER));
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbspeed")) {
-			setCB(args,0,3,sender,String.format("/speed %s %s",args[0],args[1]));
+			if (enabled(PLUGINNAMES.ESSENTIALS)) {
+				setCB(args,0,2,sender,String.format("/speed %s %s",args[0],args[1]));
+			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbmenu")) {
-			if (getServer().getPluginManager().isPluginEnabled("mymenu")) {
+			if (enabled(PLUGINNAMES.MYMENU)) {
 				setCB(args,0,2,sender,String.format("/mmopen %s %s",args[0],DEFAULT_SELECTER));
 			} else {
 				sendmes(sender, notEnabledPL("mymenu"));
 			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbgod") || cmdname.equalsIgnoreCase("cbfly") || cmdname.equalsIgnoreCase("cbtpt")) {
-			if (enabled("Essentials")) {
+			if (enabled(PLUGINNAMES.ESSENTIALS)) {
+				if (args.length == 0) {
+					errormes(TOO_FEW_ARGS,sender);
+				}
 				if ("enable".equals(args[0].toLowerCase()) || "disable".equals(args[0].toLowerCase())) {
 					setCB(args,0,2,sender,String.format("/essentials:%s %s",cmdname.toLowerCase(),args[0]));
 				} else {
 					errormes("第一引数はenableかdisableにしてください。",sender);
 				}
 			} else {
-				sendmes(sender,notEnabledPL("Essentials"));
+				sendmes(sender,notEnabledPL(PLUGINNAMES.ESSENTIALS));
 			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbmusic")) {
-			if (enabled("icJukeBox")){
+			if (enabled(PLUGINNAMES.ICJUKEBOX)) {
 				setCB(args,0,2,sender,String.format("/music play %s %s",args[0],DEFAULT_SELECTER));
 			} else {
-				errormes(notEnabledPL("icJukeBox"),sender);
+				errormes(notEnabledPL(PLUGINNAMES.ICJUKEBOX),sender);
 			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbshot")) {
-			setCB(args,0,2,sender,String.format("/shot give %s %s",DEFAULT_SELECTER,args[0]));
+			if (enabled(PLUGINNAMES.CRACKSHOT)) {
+				setCB(args,0,2,sender,String.format("/shot give %s %s",DEFAULT_SELECTER,args[0]));
+			} else {
+				errormes(notEnabledPL(PLUGINNAMES.CRACKSHOT),sender);
+			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbtell-a")) {
 			setCB(args,0,2,sender,String.format("/minecraft:tell %s %s",ALL_SELECTER,String.join(" ",args)));
@@ -456,6 +473,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					errormes("すでにコマンドブロックです！",sender);
 				}
 				loc.getBlock().setType(Material.COMMAND);
+				API.log(loc,"place","",player.getName());
 				EP.getCoreProtect().logPlacement(player.getName(), loc, Material.COMMAND, (byte)0); //CORE PROTECT
 			} else {
 				errormes(NOT_ABLE_MODIFY,sender);
@@ -474,6 +492,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			if (API.canBuild(loc, player)) {
 				if (API.isCB(loc)) {
 					loc.getBlock().setType(Material.AIR);
+					API.log(loc,"remove","",player.getName());
 					EP.getCoreProtect().logRemoval(player.getName(), loc, Material.COMMAND, (byte)0); //CORE PROTECT
 				} else {
 					errormes(NOT_CB,sender);
@@ -483,17 +502,26 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbwarp")) {
-			if (enabled("essentials")) {
+			if (enabled(PLUGINNAMES.ESSENTIALS)) {
 				setCB(args,0,2,sender,String.format("/warp %s %s",args[0],DEFAULT_SELECTER));
 			} else {
-				sendmes(sender,notEnabledPL("essentials"));
+				sendmes(sender,notEnabledPL(PLUGINNAMES.ESSENTIALS));
 			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbactionbar")) {
-			setCB(args,0,2,sender,String.format("minecraft:title %s actionbar %s",DEFAULT_SELECTER,String.join(" ",args)));
+			if (VER.isLater(11)) {
+				setCB(args,0,2,sender,String.format("minecraft:title %s actionbar %s",DEFAULT_SELECTER,String.join(" ",args)));
+			} else {
+				errormes(moreLater(11),sender);
+			}
+
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbactionbar-a")) {
-			setCB(args,0,2,sender,String.format("minecraft:title %s actionbar %s",ALL_SELECTER,String.join(" ",args)));
+			if (VER.isLater(11)) {
+				setCB(args,0,2,sender,String.format("minecraft:title %s actionbar %s",ALL_SELECTER,String.join(" ",args)));
+			} else {
+				errormes(moreLater(11),sender);
+			}
 			return true;
 		} else if (cmdname.equalsIgnoreCase("cbback")) {
 			sender.sendMessage("未サポート");//setCB(args,0,2,sender,"/nine_cbs:back");
@@ -504,6 +532,12 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		}
 		/**/
 		return false;//該当コマンドなし
+	}
+
+	private String moreLater(int i) {
+		String s = "この機能は1.$1以上のバージョンで対応しています。";
+		s = s.replace("$1", to_s(i));
+		return s;
 	}
 
 	/**
@@ -774,6 +808,10 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 
 	private int to_i(byte b) {
 		return b;
+	}
+
+	private String to_s(int i) {
+		return String.format("%d", i);
 	}
 }
 
