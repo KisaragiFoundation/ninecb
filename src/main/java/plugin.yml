@@ -3,7 +3,7 @@ version: 1.9.3
 description: nine_cb
 author: lolita_is_god
 website: ~
-softdepend: [WorldGuard, CoreProtect, essentials, icJukeBox]
+softdepend: [WorldGuard, CoreProtect, essentials, icJukeBox, CrackShot, MyMenu]
 #---
 main: jp.hikahikaru17.dev.nine_cbs.nine_cbs
 #---

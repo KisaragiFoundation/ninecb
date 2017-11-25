@@ -89,6 +89,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		getCommand("cmb").setExecutor(this);
 		getCommand("cmd").setExecutor(this);
 		getCommand("uncmb").setExecutor(this);
+		//getCommand("uncmd").setExecutor(this);
 		getCommand("cbactionbar").setExecutor(this);
 		getCommand("cbactionbar-a").setExecutor(this);
 		getCommand("cbback").setExecutor(this);
@@ -129,7 +130,17 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			}
 			switch (args[0].toLowerCase()) {
 				case "log":
-					showlog(sender);
+					if (args.length < 2) {
+						showlog(sender);
+						return true;
+					} else {
+						if (to_i(args[1]) < 1) {
+							errormes("ログのページ数は1以上でなければいけません。",sender);
+							return true;
+						}
+						showlog(sender,to_i(args[1]));
+					}
+
 					return true;
 				case "help":
 					TextComponent message = new TextComponent("Ping");
@@ -211,8 +222,8 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					helpmes += TRIGGER;
 					helpmes += String.format("%s/cbeffect <効果> [秒数] [強さ] [パーティクル表示(true/false)]%s", linebegin, lineend);
 					helpmes += String.format("%s/cbxp <量|L <レベル>>%s", linebegin, lineend);
-					helpmes += String.format("%s/cbspeed <walk|fly> <0~10>%s", linebegin, lineend);
-					helpmes += String.format("%s/cbmenu <メニュー名>%s", linebegin, lineend); //mmopen $1 @p[r=10]
+					helpmes += String.format("%s/cbspeed <walk|fly> <0~10>%s", (enabled(PLUGINNAMES.ESSENTIALS) ? linebegin : unavaiable), lineend);
+					helpmes += String.format("%s/cbmenu <メニュー名>%s", (enabled(PLUGINNAMES.MYMENU) ? linebegin : unavaiable), lineend); //mmopen $1 @p[r=10]
 					helpmes += String.format("%s/cbgod <enable|disable>%s", (enabled(PLUGINNAMES.ESSENTIALS) ? linebegin : unavaiable), lineend);
 					helpmes += String.format("%s/cbfly <enable|disable>%s", (enabled(PLUGINNAMES.ESSENTIALS) ? linebegin : unavaiable), lineend);
 					helpmes += String.format("%s/cbtpt <enable|disable>%s", (enabled(PLUGINNAMES.ESSENTIALS) ? linebegin : unavaiable), lineend);
@@ -222,13 +233,13 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					break;
 				case "3":
 					helpmes += TRIGGER;
-					helpmes += String.format("%s/cbshot <名前>%s", ((enabled(PLUGINNAMES.CRACKSHOT) ? linebegin : unavaiable)) , lineend);
+					helpmes += String.format("%s/cbshot <名前>%s", (enabled(PLUGINNAMES.CRACKSHOT) ? linebegin : unavaiable) , lineend);
 					helpmes += String.format("%s/cbtell-a <メッセージ>%s%s", linebegin, RANGE10, lineend);
 					helpmes += String.format("%s/cbtitle-a <walk|fly> <0~10>%s%s", linebegin, RANGE10, lineend);
 					helpmes += String.format("%s/cbsubtitle-a <メニュー名>%s%s", linebegin, RANGE10, lineend);
 					helpmes += String.format("%s/cbback <enable|disable>%s", /* linebegin */ unavaiable, lineend);
-					helpmes += String.format("%s/cbactionbar <メッセージ>%s", linebegin, lineend);
-					helpmes += String.format("%s/cbactionbar-a <enable|disable>%s", linebegin, lineend);
+					helpmes += String.format("%s/cbactionbar <メッセージ>%s",  (VER.isLater(11) ? linebegin : unavaiable), lineend);
+					helpmes += String.format("%s/cbactionbar-a <enable|disable>%s", (VER.isLater(11) ? linebegin : unavaiable), lineend);
 					//
 					helpmes += RETACS(3);
 					break;
@@ -576,7 +587,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					if (DEBUG && ! cb.getCommand().equals(command)) {
 						LOG.warning("[SETCB@API] HASNOT SET YET");
 					}
-					log(loc,"change",command,player.getName());
+					log(loc,"change",command,player.getName()); //FIXME:記録されてない
 					sendmes(sender,"ACTION IS DONE");
 				} else {
 					LOG.info(String.format("%d,%d,%d is not CB.",loc.getBlockX(),loc.getBlockY(),loc.getBlockZ()));
@@ -646,33 +657,39 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 
 		public boolean canBuild(Location l,Player p) {
 			CommandSender sender = p;
+			// worldguard
 			if (EP.getWorldGuard() != null && EP.getWorldGuard().canBuild(p, p.getLocation()) == false) {
+				//sender.sendMessage(nine_cbs.CLAIMED);
 				return false;
 			}
-			if (DEBUG) {
+			/*if (DEBUG) {
 				LOG.info(String.format("%s",p.getLocation().getBlockY()));
-			}
-			if (EP.getWorldGuard() == null) {
-				nine_cbs.sendmes(p,EP.notEnabledPL("WorldGuard"));
-				return false;
-			} else if (EP.getWorldGuard().canBuild(p, l) != true) {
-				sender.sendMessage(nine_cbs.CLAIMED);
-				return false;
-			}
-		//CHECK SPAWN PROTECTION
-
-			int sprad = Bukkit.getServer().getSpawnRadius();
+			}*/
+			//CHECK SPAWN PROTECTION
+			int range = Bukkit.getServer().getSpawnRadius();
 			double px = l.getX();
 			double py = l.getY();
 			double pz = l.getZ();
 			Location spawnCenter = l.getWorld().getSpawnLocation();
 			double sx = spawnCenter.getX();
 			double sz = spawnCenter.getZ();
-			BlockVector min = new BlockVector(sx-sprad,0,sz-sprad);
-			BlockVector max = new BlockVector(sx+sprad,255,sz+sprad);
-			if (min.getX() > px || max.getX() < px || min.getZ() > pz || min.getZ() < pz) { //ABLE
-				return true;
+			if (DEBUG) {
+				LOG.info(String.format("Spawn is %f,%f",sx,sz));
+				LOG.info(String.format("Protection Range is %d",range));
 			}
+
+			BlockVector min = new BlockVector(sx-range,0,sz-range);
+			BlockVector max = new BlockVector(sx+range,255,sz+range);
+			if (p.isOp()) { // OPならスポーンプロテクションをスルー
+				return true;
+			} else {
+				if (min.getX() > px && max.getX() < px && min.getZ() > pz && min.getZ() < pz) { //範囲外
+					return true;
+				} else {
+					LOG.info(String.format("%f,%f,%fはスポーンプロテクションの中です",px,py,pz));
+				}
+			}
+
 
 			return false;
 		}
@@ -757,6 +774,13 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 	}
 
 	private void showlog(CommandSender sender) {
+		showlog(sender,1);
+	}
+
+	private void showlog(CommandSender sender, int page) {
+		if (page < 1) {
+			throw new IllegalArgumentException();
+		}
 		if (!API.isPlayer(sender)) {
 			sender.sendMessage(MUST_BE_PLAYER);
 			return;
@@ -771,12 +795,13 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		String m = "";
 		double timesago;
 		int i;
+		int dispPerPage = 8;
 		for (i=0;i <= 999999;i ++) {
 			if (yamlFile.get(String.format("log%d",i)) == null) {break;}
 		}
 		m += "----"+ " Nine_cb/LOGS " + "----\n";
 		Long nowTime = System.currentTimeMillis();
-		for (int j=i-1;j >= 0;j -= 1) {
+		for (int j=i-1-page*dispPerPage;j >= page*dispPerPage;j -= 1) {
 			Long beforeTime = Long.parseLong(yamlFile.getString(String.format("log%d.time", j)));
 			//LOG.info(String.format("[N,B,N-B]%d - %d = %d",nowTime,beforeTime,nowTime-beforeTime));
 			timesago = (double)((nowTime - beforeTime) / (1000*60*60)); //時間単位
@@ -797,7 +822,6 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		LOG.info(m);
 		sender.sendMessage(m);
 	}
-
 	private int to_i(boolean b) {
 		return (b == true ? 1 : 0);
 	}
@@ -810,7 +834,11 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		return b;
 	}
 
-	private String to_s(int i) {
+	private int to_i(String s){
+		return (int)(Long.parseLong(s));
+	}
+
+	private static String to_s(int i) {
 		return String.format("%d", i);
 	}
 }

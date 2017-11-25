@@ -12,9 +12,35 @@ import org.bukkit.Bukkit;
  * @author Obsidian550D
  */
 public class MCVersion {
-	public boolean isLater(int subversion) {
-		return Bukkit.getVersion().contains("1."+subversion);
+	double newest = 12.2;
+	public boolean isLater(int subversion, double build) {
+		if (Bukkit.getVersion().contains("1."+subversion+"."+build)) {
+			return true;
+		}
+
+		for (int i=subversion;i>=(int)newest;i++) {
+			for (double j=0;j>=(newest-(int)newest);j++) {
+				if (Bukkit.getVersion().contains("1."+i+"."+j)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
+
+	public boolean isLater(int subversion) {
+		if (Bukkit.getVersion().contains("1."+subversion)) {
+			return true;
+		}
+
+		for (int i=subversion;i>=(int)newest;i++) {
+			if (Bukkit.getVersion().contains("1."+i+".")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 
 	public boolean MC1_8(){
 		return Bukkit.getVersion().contains("1.8");
