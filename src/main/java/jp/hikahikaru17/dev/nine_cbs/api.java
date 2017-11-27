@@ -5,27 +5,18 @@
  */
 package jp.hikahikaru17.dev.nine_cbs;
 
-import java.util.logging.Logger;
-import static jp.hikahikaru17.dev.nine_cbs.nine_cbs.DEBUG;
-import static org.bukkit.Bukkit.getLogger;
-import static org.bukkit.Bukkit.getServer;
-import org.bukkit.Location;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.util.BlockVector;
-
 /**
  *
  * @author Obsidian550D
  */
-class api {
-	static final externalPlugin EP = new externalPlugin();
+class api { /*
+	static final ExternalPlugin EP = new ExternalPlugin();
 	static final Logger LOG = getLogger();
 
 	/*
 		@author
 	*/
-
+	/*
 	public boolean isPlayer(CommandSender s){
 		return (s instanceof Player);
 	}
