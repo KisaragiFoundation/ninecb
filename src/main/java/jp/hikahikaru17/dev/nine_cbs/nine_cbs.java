@@ -631,15 +631,15 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					properties.put("player",p);
 					yamlFile.set(String.format("log%d",i),properties);
 			try {
-				LOG.log(Level.INFO,"TRYING SAVE TO " + BASE_PATH + "{0}", FILE_NAME);
+				LOG.log(Level.INFO,"[LOG@API] TRYING SAVE TO " + BASE_PATH + "{0}", FILE_NAME);
 				yamlFile.save(BASE_PATH + FILE_NAME);
-				LOG.info("SUCCESS SAVE!");
+				LOG.info("[LOG@API] SUCCESS SAVE!");
 			} catch (IOException e) {
-				LOG.warning("FAILED SAVING FILE!");
+				LOG.warning("[LOG@API] FAILED SAVING FILE!");
 			}
 
 		} catch (RuntimeException e) {
-			LOG.warning("ERROR OCUSED : RUNTIME EXEPTION");
+			LOG.warning("[LOG@API] ERROR OCUSED : RUNTIME EXEPTION");
 		}
 
 		}
@@ -687,14 +687,12 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 					return true;
 				} else {
 					LOG.info(String.format("%f,%f,%fはスポーンプロテクションの中です",px,py,pz));
+					return false;
 				}
 			}
-
-
-			return false;
 		}
+	} // CLASS END
 
-	}
 	public static InternalAPI newAPI() {
 		return new InternalAPI();
 	}
@@ -769,7 +767,7 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		sendto.SendMessage(prefix + " 未実装");
 	}*/
 
-	private void errormes(String s, CommandSender cs) {
+	private static void errormes(String s, CommandSender cs) {
 		cs.sendMessage(prefixError + s);
 	}
 
@@ -799,12 +797,22 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		for (i=0;i <= 999999;i ++) {
 			if (yamlFile.get(String.format("log%d",i)) == null) {break;}
 		}
+
+		if (i == 0) {
+			player.sendMessage("ここにログはありません");
+			return;
+		}
+
+		if (i < page*dispPerPage) {
+			return;
+		}
 		m += "----"+ " Nine_cb/LOGS " + "----\n";
 		Long nowTime = System.currentTimeMillis();
-		for (int j=i-1-page*dispPerPage;j >= page*dispPerPage;j -= 1) {
+		//LOG.info(to_s(page*dispPerPage));
+		for (int j=i-1-page*dispPerPage;j >= i-9-page*dispPerPage || j == 0;j -= 1) {
 			Long beforeTime = Long.parseLong(yamlFile.getString(String.format("log%d.time", j)));
 			//LOG.info(String.format("[N,B,N-B]%d - %d = %d",nowTime,beforeTime,nowTime-beforeTime));
-			timesago = (double)((nowTime - beforeTime) / (1000*60*60)); //時間単位
+			timesago = ((nowTime - beforeTime) / (1000*60*60)); //時間単位
 			//LOG.info(yamlFile.getString(String.format("log%d.time", j)));
 			String l = "";
 			l += String.format("%.2f",((nowTime-beforeTime)/(60*60*1000d)));
@@ -818,6 +826,11 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 			m += yamlFile.getString(String.format("log%d.after",j)); //command
 			m += "\n";
 			m += ChatColor.RESET;
+
+		}
+
+		if (i > dispPerPage) {
+			m += String.format("%d/%d Page",page,i/dispPerPage); // ページ数
 		}
 		LOG.info(m);
 		sender.sendMessage(m);
