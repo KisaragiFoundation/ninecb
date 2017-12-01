@@ -1,11 +1,6 @@
+
+
 # ninecb
-このリポジトリの所有権はlolita-is-goddddが所有しています。
-
-当プラグインの著作権を含む全ての権利は、lolita-is-goddddが所有しています。
-
-当リポジトリのコードまた付随するファイルに関するサポートはコラボレーター以外の方は一切受けられません。
-
-ninecb
 ====
 
 ## 概要
@@ -45,7 +40,13 @@ Wiki嫁
 
 ## Licence
 
-[MIT](https://github.com/lolita-is-godddd/ninecb/master/LICENCE.md)
+[MIT](https://github.com/lolita-is-godddd/ninecb/master/LICENCE)
+
+このリポジトリの所有権はlolita-is-goddddが所有しています。
+
+当プラグインの著作権を含む全ての権利は、lolita-is-goddddが所有しています。
+
+当リポジトリのコードまた付随するファイルに関するサポートはコラボレーター以外の方は一切受けられません。
 
 ## Author
 
