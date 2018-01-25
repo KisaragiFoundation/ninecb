@@ -93,7 +93,9 @@ public class nine_cbs extends JavaPlugin implements CommandExecutor{
 		getCommand("cbactionbar").setExecutor(this);
 		getCommand("cbactionbar-a").setExecutor(this);
 		getCommand("cbback").setExecutor(this);
+		LOG.info("上位互換のFreeCommandBlockが利用できます。詳しくは[https://github.com/lolita-is-godddd/FreeCommandBlock]を参照してください。")
 		//this.getServer().getPluginManager().registerEvents(new MyListenerClass(), this));
+		//if getServer().getPluginManager.getPlugin("FreeCommandBlock") != null {disable this}
 	}
 
 	@Override
