@@ -1,4 +1,4 @@
-**WARNING:** サポートは終了します。後継プラグインは[AAA](https://github.com/lolita-is-godddd/FreeCommandBlock)をご利用ください。
+**WARNING:** サポートは終了します。後継プラグインは[FreeCommandBlock](https://github.com/lolita-is-godddd/FreeCommandBlock)をご利用ください。
 
 # ninecb
 ====
