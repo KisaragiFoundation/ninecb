@@ -1,4 +1,4 @@
-**WARNING:** サポートは終了します。後継プラグインは[FreeCommandBlock](https://github.com/lolita-is-godddd/FreeCommandBlock)をご利用ください。
+**WARNING:** サポートは終了しました。後継プラグインは[FreeCommandBlock](https://github.com/lolita-is-godddd/FreeCommandBlock)をご利用ください。
 
 # ninecb
 ====
@@ -21,13 +21,13 @@
 
 ## 必要環境
 太字は必須、それ以外は任意
-・**Spigot** (MCVersion 1.11.2 or Later)
-・WorldGuard (Any)
-・Essentials (Any)
-・icJukeBox (Any)
-・CoreProtect (Any)
-・CrackShot (Any, Not Plus)
-・WorldEdit (Any)
+* **Spigot** (MCVersion 1.11.2 or Later)
+* WorldGuard (Any)
+* Essentials (Any)
+* icJukeBox (Any)
+* CoreProtect (Any)
+* CrackShot (Any, Not Plus)
+* WorldEdit (Any)
 
 ## Usage
 Wiki嫁
@@ -46,7 +46,7 @@ Wiki嫁
 
 当プラグインの著作権を含む全ての権利は、lolita-is-goddddが所有しています。
 
-当リポジトリのコードまた付随するファイルに関するサポートはコラボレーター以外の方は一切受けられません。
+当リポジトリのコードまた付随するファイルに関するサポートはいかなる方でもお受けになれません。
 
 ## Author
 
